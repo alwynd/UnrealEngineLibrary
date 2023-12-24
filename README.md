@@ -30,7 +30,7 @@ Usage: Download and extract the JSON+Thumbnail Catalog 1st into the **'project f
 
 **How to extract your own project's JSON/Thumbnails**
 Download and extract this UE5.3 C++ ( Project name says 5.1, but it was built for 5.3, it is a c++ project )
-https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u/view?usp=drive_link
+https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u
 
 **Import your content into the Content/ folder, or grab the code, and the build file target changes etc.**
 
