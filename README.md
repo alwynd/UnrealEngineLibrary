@@ -10,13 +10,16 @@ Since it uses JQ, there is no limit as to how the querying/grouping can be done.
 You can also use JQ in the command line on the UELibrary/ included folder, BUT the tool includes the ability
 to obtain and show the thumbnails along with its meta data on the screen.
 
-Unreal Engine Project Catalog: https://docs.google.com/spreadsheets/d/1xYUMvSJW7Z9hHA15pBjDcslm1z6FpUTEPxUDqikB0wg
+Unreal Engine Project Catalog: 
+<br/>
+https://docs.google.com/spreadsheets/d/1xYUMvSJW7Z9hHA15pBjDcslm1z6FpUTEPxUDqikB0wg
 - This contains the projects, and URL's to the marketplace, to download/buy the projects if you require them,
 **as this project only lists meta data of each and every asset in all of the marketplace projects.**
  <br/>
  <br/>
 
-Asset Catalog ( ~13GB tar.gz JSON and 256x256 png thumbnails of all assets listed in the projects from the main catalog ): https://drive.google.com/file/d/1TSBblfevuoFxVz3LnhNvseGLVarkypuG<br/>
+Asset Catalog ( ~13GB tar.gz JSON and 256x256 png thumbnails of all assets listed in the projects from the main catalog ):
+<br/>https://drive.google.com/file/d/1TSBblfevuoFxVz3LnhNvseGLVarkypuG<br/>
 _catalog tarball too big for git lfs, and filenames too long for github, so I keep them in google drive_
 <br/>
 <br/>
@@ -30,6 +33,7 @@ Usage: Download and extract the JSON+Thumbnail Catalog 1st into the **'project f
 
 **How to extract your own project's JSON/Thumbnails**
 Download and extract this UE5.3 C++ ( Project name says 5.1, but it was built for 5.3, it is a c++ project )
+<br/>
 https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u
 
 **Import your content into the Content/ folder, or grab the code, and the build file target changes etc.**
