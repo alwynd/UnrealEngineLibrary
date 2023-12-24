@@ -9,6 +9,13 @@ Since it uses JQ, there is no limit as to how the querying/grouping can be done.
 You can also use JQ in the command line on the UELibrary/ included folder, BUT the tool includes the ability
 to obtain and show the thumbnails along with its meta data on the screen.
 
+Unreal Engine Project Catalog: https://docs.google.com/spreadsheets/d/1xYUMvSJW7Z9hHA15pBjDcslm1z6FpUTEPxUDqikB0wg  
+Usage: Extract the JSON+Thumbnail Catalog 1st.
+- <b>tar -xzvf UELibrary.tar.gz -C UELibrary/</b>
+- Build the project with Dotnet 8
+- - <b>dotnet build QueryUELibrary.sln</b>
+- - Run the executable, it is a Windows Forms app.
+
 TODO:
 - The JQ search and display
 - Copying the content from your UE Library/Repo into a UE project using Azure azcopy
