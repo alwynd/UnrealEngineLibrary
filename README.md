@@ -39,7 +39,9 @@ https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u
 **Import your content into the Content/ folder, or grab the code, and the build file target changes etc.**
 
 Open the UE51Test project, while in the EDITOR, open the CONSOLE with tilde "`" and enter
-"ExportAllAssetInfo", and hit enter.
+"**_ExportAllAssetInfo_**", and hit enter.
+<br/>
+Once completed, the thumbnails and JSON file will be in the root of the extracted _UE51Test_ project folder
 <br/>
 <br/>
 _Sometimes it can crash if the blueprints have not been imported correctly, if that is the case, fix them, or remove them, and run it again
