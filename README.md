@@ -2,6 +2,7 @@ This allows querying Unreal Engine projects from the Marketplace, using JSON and
 Only works on Windows, and requires Cygwin, with JQ installed to function.
 
 The Includes most of the free marketplace asset meta data ( NO ACTUAL ASSETS, ONLY THUMBNAILS and META DATA )
+<br/>
 Use this tool, so find assets, with a thumbnail to see what it looks like, by name/size/asset type
 
 Since it uses JQ, there is no limit as to how the querying/grouping can be done.
