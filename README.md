@@ -1,5 +1,6 @@
-This allows querying Unreal Engine projects from the Marketplace, using JSON and JQ with Cygwin.
+This allows querying Unreal Engine projects for any and all asset information, including NAMES, SIZE, TYPE with THUMBNAILS from the Marketplace, using JSON and JQ with Cygwin.
 Only works on Windows, and requires Cygwin, with JQ installed to function.
+<br/>
 
 The Includes most of the free marketplace asset meta data ( NO ACTUAL ASSETS, ONLY THUMBNAILS and META DATA )
 <br/>
