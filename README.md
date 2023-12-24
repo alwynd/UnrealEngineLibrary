@@ -38,8 +38,13 @@ Download and extract this UE5.3 C++ ( Project name says 5.1, but it was built fo
 https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u
 
 **Import your content into the Content/ folder, or grab the code, and the build file target changes etc.**
-
-Open the UE51Test project, while in the EDITOR, open the CONSOLE with tilde "`" and enter
+<br/>
+<br/>
+Open the UE51Test project, while in the EDITOR,
+<br/>
+**_SELECT THE CONTENT FOLDER IN THE CONTENT BROWSER, NOT THE "ALL" FOLDER_ or select any sub folders in the content browser**
+<br/>
+open the CONSOLE with tilde "`" and enter
 "**_ExportAllAssetInfo_**", and hit enter.
 <br/>
 Once completed, the thumbnails and JSON file will be in the root of the extracted _UE51Test_ project folder
@@ -50,6 +55,8 @@ you may need to run it twice, as the thumbnails dont always export the 1st time,
 after doing it for over 500 projects I can live with it, 1st run can take long depending on your specs, 2nd run will take a few seconds._
 
 <br/>
+<br/>
+If you only want the c++ code to extract JSON/Thumbnails from UE, look in the ExtractJSONFromUE/ folder for the c++ source.
 <br/>
 
 **_TODO:_**
