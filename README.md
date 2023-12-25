@@ -53,6 +53,7 @@ Here are the steps to extract your own project's details:
    1. 1st run will take a while, depending on your PC and the project.
    2. **YOU HAVE TO RUN IT TWICE** to ensure all thumbnails get generated. The 2nd run will take only a few seconds. 
 5. Once completed, thumbnails and JSON file will be in the root of the extracted `UE5.3` project folder.
+6. If you just want the c++ code, look under: [ExtractJSONFromUE](https://github.com/alwynd/UnrealEngineLibrary/tree/main/ExtractJSONFromUE)
 
 **Note:** There can be crashes if the blueprints and/or skeletons/animations and even maps have not been imported correctly. 
 
