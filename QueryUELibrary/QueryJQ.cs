@@ -14,14 +14,14 @@ public class QueryJQ
     private bool isRunning = false;
     
     /// <summary>
-    /// Specify the path to the Cygwin executable
+    /// Specify the path to the powershell script
     /// </summary>
-    public static string cygwinExecutablePath { get; set; } = "C:/path/to/cygwin/bin/bash.exe";
+    public static string PowerShellScriptPath { get; set; } = "query.ps1";
 
     /// <summary>
     /// Runs JQ via Cygwin.
     /// </summary>
-    public async Task<string> RunCygwinCommand(string command)
+    public async Task<string> RunCommand(string userQuery)
     {
         if (isRunning) return string.Empty;
         isRunning = true;
@@ -31,13 +31,18 @@ public class QueryJQ
             string result = string.Empty;
             string error = string.Empty;
 
-            Logging.Info($"{GetType().Name}.RunCygwinCommand:-- START, command: {command}");
+            // Read the PowerShell script template
+            // Replace the placeholder with the actual query
+            // Convert the script to a PowerShell script block
+            string scriptTemplate = File.ReadAllText(PowerShellScriptPath);
+            string modifiedScript = scriptTemplate.Replace("{QUERY_JQ}", userQuery);
+            string scriptBlock = $"& {{{modifiedScript}}}";
+
             // Set up the process start info
-            // Execute the process asynchronously
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = cygwinExecutablePath,
-                Arguments = "-c \"" + command + "\"",
+                FileName = "powershell.exe",
+                Arguments = $"-ExecutionPolicy Bypass -Command {scriptBlock}",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -45,27 +50,25 @@ public class QueryJQ
             };
 
             using Process process = new Process { StartInfo = startInfo };
-            // Read the output
-            // Read the error output
-            // Wait for the process to exit
+
+            // Execute the process asynchronously and read the output/error
             process.Start();
-
             result = await process.StandardOutput.ReadToEndAsync();
-            Logging.Info($"{GetType().Name}.RunCygwinCommand: result length: {result.Length}");
-            Logging.Debug($"{GetType().Name}.RunCygwinCommand: result: {result}");
-
             error = await process.StandardError.ReadToEndAsync();
-
             await process.WaitForExitAsync();
-            if (!string.IsNullOrEmpty(error)) throw new Exception($"{GetType().Name}.RunCygwinCommand: Error: {error}");
 
+            if (!string.IsNullOrEmpty(error)) 
+                throw new Exception($"{GetType().Name}.RunCommand: Error: {error}");
+
+            Logging.Info($"{GetType().Name}.RunCommand: result length: {result.Length}");
+            Logging.Debug($"{GetType().Name}.RunCommand: result: {result}");
             return result;
-
         }
         finally
         {
             isRunning = false;
         }
-
-    }    
+    }
+    
+     
 }

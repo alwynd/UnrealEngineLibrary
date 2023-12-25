@@ -13,7 +13,8 @@ This Windows tool allows querying Unreal Engine projects for asset information, 
 - Types
 - Thumbnails from the [Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/en-US/store) (No actual assets, only thumbnails and meta data)
 
-It requires Cygwin, with JQ installed to function.
+It uses Powershell with a custom query string that is passed to a script template, for obtaining matching asset json, then displays their thumbnails in the UI.
+
 
 ---
 
@@ -38,6 +39,45 @@ Get it here: [Google Drive](https://drive.google.com/file/d/1TSBblfevuoFxVz3LnhN
 1. Download and extract the JSON+Thumbnail Catalog first into the `project folder/UELibrary/`. Use `tar -xzvf UELibrary.tar.gz -C UELibrary/` to extract the catalog.
 2. Build the project with Dotnet 8 using `dotnet build QueryUELibrary.sln`.
 3. Run the executable. This is a Windows Forms application.
+
+A query example:
+`$_.AssetPath -match "spruce" -and $_.AssetType -match "staticmesh"`
+
+This will find all StaticMeshes in all marketplace projects, where the name matches "spruce" for example.
+The query can be as simple, or as complex as you want it to be.
+
+The only fields available to query are:
+
+- **AssetPath**: _string_
+  - This is relative to the Content/ directory, of the Unreal Engine Marketplace Project, as specified in the Unreal Engine Project Catalog, at the top of this document
+  - It is NOT guaranteed to match the EXACT path of the marketplace project, BUT the name will always be the same
+- **SizeOnDisk**: _number_
+  - The actual number of bytes on disk, as obtained from Unreal Engine using c++.
+- **AssetType**: _string_
+  - Unreal Engine dictates these values, inspect the files to find out what they all are
+  - Use -match in powershell to use "like" queries, since exact type matching will vary between engine version and who knows what Epic uses for everything. ( not all 500+ projects were extracted from a single engine version, this has been built up over time )
+
+
+---
+
+## JSON File Structure
+
+```json
+{
+	"/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin":
+	{
+		"AssetPath": "/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin",
+		"SizeOnDisk": 160872,
+		"AssetType": "/Script/Engine.Skeleton"
+	},
+	"/Game/Characters/Mannequins/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop":
+	{
+		"AssetPath": "/Game/Characters/Mannequins/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop",
+		"SizeOnDisk": 698209,
+		"AssetType": "/Script/Engine.AnimSequence"
+	},
+...
+``` 
 
 ---
 
@@ -67,6 +107,6 @@ so the process does work, but you have to understand Unreal Engine migration in 
 
 In the future, this tool aims to:
 
-- Enable JQ search and display
+- Enable search and display
 - Allow easy copying of content from UE Library/Repo into an UE project using Azure azcopy
 - Include custom copy facilities, such as disk/network.
