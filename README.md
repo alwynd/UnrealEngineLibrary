@@ -62,6 +62,10 @@ The only fields available to query are:
 
 ## JSON File Structure
 
+Each and every marketplace project, listed in the main Project catalog above, will have 1 and only 1 JSON file, that contains an array of all of it's assets.
+<br/>
+It will also contain a folder, with each and every assets' 256x256 PNG thumbnail it was able to extract from Unreal, using c++ ( source and project included ) 
+
 ```json
 {
 	"/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin":
@@ -78,6 +82,8 @@ The only fields available to query are:
 	},
 ...
 ``` 
+
+The combination of the JSON and Thumbnails are used to search and display the results on screen.
 
 ---
 
