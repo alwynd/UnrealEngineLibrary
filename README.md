@@ -64,7 +64,7 @@ The only fields available to query are:
 
 Each and every marketplace project, listed in the main Project catalog above, will have 1 and only 1 JSON file, that contains an array of all of it's assets.
 <br/>
-It will also contain a folder, with each and every assets' 256x256 PNG thumbnail it was able to extract from Unreal, using c++ ( source and project included ) 
+It will also contain a folder, with each and every assets' 256x256 PNG thumbnail it was able to extract from Unreal, using c++ ( ExtractJSON source and project included ) 
 
 ```json
 {
