@@ -8,7 +8,9 @@ Get-ChildItem -Path $directory -Filter *.json | ForEach-Object {
         $json = Get-Content -Path $filePath | ConvertFrom-Json
         $matchedEntries = $json.PSObject.Properties.Value | 
         Where-Object {
-            # example: $_.AssetPath -match $keyword1 -and $_.AssetType -match $keyword2
+            # example: $_.AssetPath -match "spruce" -and $_.AssetType -match "staticmesh"
+            # example: $_.SizeOnDisk -gt 104857600
+            # example: $_.AssetPath -match "combat.*sword" -and $_.AssetType -match "animation"
             {QUERY_JQ}
         }
 

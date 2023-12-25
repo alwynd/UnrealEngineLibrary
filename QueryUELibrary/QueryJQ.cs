@@ -14,14 +14,9 @@ public class QueryJQ
     private bool isRunning = false;
     
     /// <summary>
-    /// Specify the path to the powershell script
-    /// </summary>
-    public static string PowerShellScriptPath { get; set; } = "query.ps1";
-
-    /// <summary>
     /// Runs JQ via Cygwin.
     /// </summary>
-    public async Task<string> RunCommand(string userQuery)
+    public async Task<string> RunCommand(string script, string userQuery)
     {
         if (isRunning) return string.Empty;
         isRunning = true;
@@ -34,7 +29,7 @@ public class QueryJQ
             // Read the PowerShell script template
             // Replace the placeholder with the actual query
             // Convert the script to a PowerShell script block
-            string scriptTemplate = File.ReadAllText(PowerShellScriptPath);
+            string scriptTemplate = File.ReadAllText(script);
             string modifiedScript = scriptTemplate.Replace("{QUERY_JQ}", userQuery);
             string scriptBlock = $"& {{{modifiedScript}}}";
 
