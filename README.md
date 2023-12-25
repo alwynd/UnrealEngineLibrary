@@ -1,65 +1,64 @@
-This allows querying Unreal Engine projects for any and all asset information, including NAMES, SIZE, TYPE with THUMBNAILS from the Marketplace, using JSON and JQ with Cygwin.
-Only works on Windows, and requires Cygwin, with JQ installed to function.
-<br/>
+# Query Unreal Engine Library
 
-The Includes most of the free marketplace asset meta data ( NO ACTUAL ASSETS, ONLY THUMBNAILS and META DATA )
-<br/>
-Use this tool, so find assets, with a thumbnail to see what it looks like, by name/size/asset type
+**Email:** [_alwyn.j.dippenaar@gmail.com_](mailto:_alwyn.j.dippenaar@gmail.com_)
 
-Since it uses JQ, there is no limit as to how the querying/grouping can be done.
+---
 
-You can also use JQ in the command line on the UELibrary/ included folder, BUT the tool includes the ability
-to obtain and show the thumbnails along with its meta data on the screen.
+## Introduction
 
-Unreal Engine Project Catalog: 
-<br/>
-https://docs.google.com/spreadsheets/d/1xYUMvSJW7Z9hHA15pBjDcslm1z6FpUTEPxUDqikB0wg
-- This contains the projects, and URL's to the marketplace, to download/buy the projects if you require them,
-**as this project only lists meta data of each and every asset in all of the marketplace projects.**
- <br/>
- <br/>
+This Windows tool allows querying Unreal Engine projects for asset information, including:
 
-Asset Catalog ( ~13GB tar.gz JSON and 256x256 png thumbnails of all assets listed in the projects from the main catalog ):
-<br/>https://drive.google.com/file/d/1TSBblfevuoFxVz3LnhNvseGLVarkypuG<br/>
-_catalog tarball too big for git lfs, and filenames too long for github, so I keep them in google drive_
-<br/>
-<br/>
-Usage: Download and extract the JSON+Thumbnail Catalog 1st into the **'project folder'/UELibrary/**
-- **tar -xzvf UELibrary.tar.gz -C UELibrary/**
-- Build the project with Dotnet 8
-- - **dotnet build QueryUELibrary.sln**
-- - Run the executable, it is a Windows Forms app.
+- Names
+- Sizes
+- Types
+- Thumbnails from the [Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/en-US/store) (No actual assets, only thumbnails and meta data)
 
-<br/>
+It requires Cygwin, with JQ installed to function.
 
-**How to extract your own project's JSON/Thumbnails**
-Download and extract this UE5.3 C++ ( Project name says 5.1, but it was built for 5.3, it is a c++ project )
-<br/>
-https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u
+---
 
-**Import your content into the Content/ folder, or grab the code, and the build file target changes etc.**
-<br/>
-<br/>
-Open the UE51Test project, while in the EDITOR,
-<br/>
-**_SELECT THE CONTENT FOLDER IN THE CONTENT BROWSER, NOT THE "ALL" FOLDER_ or select any sub folders in the content browser**
-<br/>
-open the CONSOLE with tilde "`" and enter
-"**_ExportAllAssetInfo_**", and hit enter.
-<br/>
-Once completed, the thumbnails and JSON file will be in the root of the extracted _UE51Test_ project folder
-<br/>
-<br/>
-_Sometimes it can crash if the blueprints have not been imported correctly, if that is the case, fix them, or remove them, and run it again
-you may need to run it twice, as the thumbnails dont always export the 1st time, not sure why and dont really care at this point
-after doing it for over 500 projects I can live with it, 1st run can take long depending on your specs, 2nd run will take a few seconds._
+## Unreal Engine Project Catalog
 
-<br/>
-<br/>
-If you only want the c++ code to extract JSON/Thumbnails from UE, look in the ExtractJSONFromUE/ folder for the c++ source.
-<br/>
+The catalog contains the projects and URLs to the marketplace, where you can download/buy them. It lists the meta data of each asset in all marketplace projects.
 
-**_TODO:_**
-- The JQ search and display
-- Copying the content from your UE Library/Repo into a UE project using Azure azcopy
-- - Extend the tool to allow custom copy, such as disk/network.
+Access the catalog here: [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1xYUMvSJW7Z9hHA15pBjDcslm1z6FpUTEPxUDqikB0wg)
+
+---
+
+## Asset Catalog
+
+The asset catalog is a ~13GB tar.gz zip file, containing JSON and 256x256 png thumbnails of all assets listed in the projects of the Google Spreadsheet catalog. Due to its size and filename lengths, it is hosted on Google Drive.
+
+Get it here: [Google Drive](https://drive.google.com/file/d/1TSBblfevuoFxVz3LnhNvseGLVarkypuG)
+
+---
+
+## Usage
+
+1. Download and extract the JSON+Thumbnail Catalog first into the `project folder/UELibrary/`. Use `tar -xzvf UELibrary.tar.gz -C UELibrary/` to extract the catalog.
+2. Build the project with Dotnet 8 using `dotnet build QueryUELibrary.sln`.
+3. Run the executable. This is a Windows Forms application.
+
+---
+
+## Extracting your own project's JSON/Thumbnails
+
+Here are the steps to extract your own project's details:
+
+1. Download and extract this [UE5.3 C++ Project](https://drive.google.com/file/d/1MHiWk5OJZ_mr4_JUtPSTqJgB8ohUYN3u).
+2. Import your content into the Content/ folder, or grab the code, and amend the build file target changes.
+3. Run the UE5.3 Project. Once in the Editor, select the content folder in the Content Browser.
+4. Open the console with tilde "`", and enter "ExportAllAssetInfo", and press Enter.
+5. Once completed, thumbnails and JSON file will be in the root of the extracted `UE5.3` project folder.
+
+**Note:** There can be crashes if the blueprints have not been imported correctly. If that happens, fix them, or remove them, and run the process again.
+
+---
+
+## Future Work
+
+In the future, this tool aims to:
+
+- Enable JQ search and display
+- Allow easy copying of content from UE Library/Repo into an UE project using Azure azcopy
+- Include custom copy facilities, such as disk/network.
