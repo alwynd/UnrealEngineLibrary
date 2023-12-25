@@ -49,7 +49,7 @@ Here are the steps to extract your own project's details:
 2. Import your content into the Content/ folder, or grab the code, and amend the build file target changes.
 3. Open the UE5.3 Project. Once in the Editor, select the content folder in the Content Browser.
    1. You can also select any subfolder, and it will only update the thumbnails for assets in that folder ( and subfolders ), but it will always extract all project asset's JSON.
-4. Open the console with tilde "`", and enter "ExportAllAssetInfo", and press Enter.
+4. Open the console with tilde "`", and enter "ExportAllAssetInformation", and press Enter.
    1. 1st run will take a while, depending on your PC and the project.
    2. **YOU HAVE TO RUN IT TWICE** to ensure all thumbnails get generated. The 2nd run will take only a few seconds. 
 5. Once completed, thumbnails and JSON file will be in the root of the extracted `UE5.3` project folder.
