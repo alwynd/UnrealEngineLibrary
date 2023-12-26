@@ -14,7 +14,7 @@ public class QueryJQ
     private bool isRunning = false;
     
     /// <summary>
-    /// Runs JQ via Cygwin.
+    /// Runs Powershell.
     /// </summary>
     public async Task<QueryJQResult> RunCommand(string script, string userQuery)
     {

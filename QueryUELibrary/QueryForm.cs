@@ -40,7 +40,7 @@ namespace QueryUELibrary
                     "Remember, ONLY 1 Object-Where query is allowed at a time, the below is just examples of such queries, submitting this \"as is\" will result in an error\r\n" +
                     "$_.AssetPath -match \"spruce\" -and $_.AssetType -match \"staticmesh\"\r\n\t # - look for all assets, containing the text \"spruce\", where the asset is a static mesh.\r\n\r\n" +
                     "$_.SizeOnDisk -gt 104857600\r\n\t #- Look for all assets, where the size on disk, is greater than 100MB.\r\n\r\n" +
-                    "$_.AssetPath -match \"combat.*sword\" -and $_.AssetType -match \"animation\"\r\n\t #- Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.";
+                    "$_.AssetPath -match \"slash.*sword\" -and $_.AssetType -match \"anim\"\r\n\t #- Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.";
             };
 
             // html help.
@@ -73,6 +73,13 @@ namespace QueryUELibrary
         /// </summary>
         private void Query()
         {
+
+            if (string.IsNullOrEmpty(JQQuery.Text))
+            {
+                JQQuery.Text = "Put some text here, use \"Examples\" if not sure.";
+                return;
+            }
+            
             // Creating an instance of QueryJQ
             var queryJq = new QueryUELibrary.QueryJQ();
 
@@ -102,6 +109,15 @@ namespace QueryUELibrary
 
             busyDialog.Controls.Add(splitContainer);
 
+            // Add a terminate button
+            var terminate = new Button()
+            {
+                Text = "TERMINATE",
+                Dock = DockStyle.Bottom,
+            };
+            terminate.Click += (s, e) => { Application.Exit(); };
+            busyDialog.Controls.Add(terminate);
+            
             // Add a Close button
             var closeButton = new Button()
             {
