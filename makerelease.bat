@@ -2,7 +2,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 SET ReleaseDir=Release
 SET SourceDir=QueryUELibrary\bin\Release\net8.0-windows
 SET dateStr=%date:~10,4%-%date:~4,2%-%date:~7,2%
-SET zipFile=%ReleaseDir%\QueryUELibrary-%dateStr%.zip
+SET zipFile=QueryUELibrary-%dateStr%.zip
 
 :: Make/Clean the Release folder.
 IF NOT EXIST %ReleaseDir% (
@@ -27,14 +27,18 @@ IF ERRORLEVEL 1 (
 )
 
 :: Run a PowerShell command to Zip it UP.
-Powershell.exe -Command "
-Add-Type -assembly 'system.io.compression.filesystem';
-[io.compression.zipfile]::CreateFromDirectory('%CD%\%ReleaseDir%', '%zipFile%');"
+Powershell.exe -Command "& { Add-Type -assembly 'system.io.compression.filesystem'; [io.compression.zipfile]::CreateFromDirectory('%CD%\%ReleaseDir%', '%zipFile%'); }"
 
 IF ERRORLEVEL 1 (
     echo Failed to create a zip file.
     pause
-    exit /b 97
+    exit /b 98
+)
+
+:: Delete copied files
+DEL /Q /F %ReleaseDir%\*.*
+IF EXIST %zipFile% (
+    MOVE %zipFile% %ReleaseDir%\
 )
 
 echo Success!
