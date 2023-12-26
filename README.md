@@ -40,8 +40,19 @@ Get it here: [Google Drive](https://drive.google.com/file/d/1TSBblfevuoFxVz3LnhN
 2. Build the project with Dotnet 8 using `dotnet build QueryUELibrary.sln`.
 3. Run the executable. This is a Windows Forms application.
 
-A query example:
-`$_.AssetPath -match "spruce" -and $_.AssetType -match "staticmesh"`
+### Query examples:
+`$_.AssetPath -match 'spruce' -and $_.AssetType -match 'staticmesh'`<br/>
+look for all assets, containing the text 'spruce', where the asset is a static mesh.<br/><br/>
+`$_.SizeOnDisk -gt 104857600`<br/>
+Look for all assets, where the size on disk, is greater than 100MB<br/><br/>
+`$_.AssetPath -match 'slash.*sword' -and $_.AssetType -match 'anim'`<br/>
+Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.<br/><br/>
+`$_.AssetPath -match 'sword|shield' -and $_.AssetType -match 'anim|sound'`<br/>
+Look for all assets, where the name regex matches sword or shield, where the asset type is an animation, or a sound.<br/><br/>
+`$_.AssetPath -match 'cave.*ambient|ambient.*cave' -and $_.AssetType -match 'sound'`<br/>
+Look for all ambient cave sounds<br/><br/>
+`($_.AssetPath -match 'armor' -and $_.AssetType -match 'static|skeletal') -or ($_.AssetPath -match 'combat' -and $_.AssetType -match 'anim')`<br/>
+Look for more complex stuff.<br/><br/>
 
 This will find all StaticMeshes in all marketplace projects, where the name matches "spruce" for example.
 The query can be as simple, or as complex as you want it to be.
