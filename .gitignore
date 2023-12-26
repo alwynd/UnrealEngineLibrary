@@ -356,4 +356,4 @@ MigrationBackup/
 /src/PackageUploader.Application/Properties/launchSettings.json
 
 properties.ini
-!ReleaseScripts/
+!ReleaseScripts/properties.ini
