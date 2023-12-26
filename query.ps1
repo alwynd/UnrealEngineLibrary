@@ -1,4 +1,16 @@
-$directory = "UELibrary"
+try {
+    if (Test-Path .\config.ini) {
+        $config = ConvertFrom-StringData (Get-Content .\properties.ini -Raw)
+        $directory = $config["paths.UELibraryFolder"]
+    } 
+
+    if(!$directory) {
+        $directory = "UELibrary"
+    }
+} catch {
+    $directory = "UELibrary"
+}
+Write-Output "PS using Library folder: $directory"
 
 $results = @()
 

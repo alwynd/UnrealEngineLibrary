@@ -356,3 +356,5 @@ MigrationBackup/
 
 # Other
 /src/PackageUploader.Application/Properties/launchSettings.json
+
+properties.ini
