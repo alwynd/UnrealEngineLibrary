@@ -5,10 +5,10 @@ try {
     } 
 
     if(!$directory) {
-        $directory = "UELibrary"
+        $directory = "../../../../UELibrary"
     }
 } catch {
-    $directory = "UELibrary"
+    $directory = "../../../../UELibrary"
 }
 Write-Output "PS using Library folder: $directory"
 

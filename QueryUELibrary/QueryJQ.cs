@@ -16,16 +16,15 @@ public class QueryJQ
     /// <summary>
     /// Runs JQ via Cygwin.
     /// </summary>
-    public async Task<string> RunCommand(string script, string userQuery)
+    public async Task<QueryJQResult> RunCommand(string script, string userQuery)
     {
-        if (isRunning) return string.Empty;
+        QueryJQResult result = new QueryJQResult();
+        
+        if (isRunning) return result;
         isRunning = true;
 
         try
         {
-            string result = string.Empty;
-            string error = string.Empty;
-
             // Read the PowerShell script template
             // Replace the placeholder with the actual query
             // Convert the script to a PowerShell script block
@@ -48,15 +47,13 @@ public class QueryJQ
 
             // Execute the process asynchronously and read the output/error
             process.Start();
-            result = await process.StandardOutput.ReadToEndAsync();
-            error = await process.StandardError.ReadToEndAsync();
+            result.Result = await process.StandardOutput.ReadToEndAsync();
+            result.Error = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            if (!string.IsNullOrEmpty(error)) 
-                throw new Exception($"{GetType().Name}.RunCommand: Error: {error}");
-
-            Logging.Info($"{GetType().Name}.RunCommand: result length: {result.Length}");
-            Logging.Debug($"{GetType().Name}.RunCommand: result: {result}");
+            Logging.Info($"{GetType().Name}.RunCommand: result length: {result.Result.Length}");
+            Logging.Debug($"{GetType().Name}.RunCommand: result: {result.Result}");
+            if (!string.IsNullOrEmpty(result.Error)) Logging.Info($"{GetType().Name}.RunCommand: error: {result.Error}");
             return result;
         }
         finally
@@ -64,6 +61,21 @@ public class QueryJQ
             isRunning = false;
         }
     }
+
+    /// <summary>
+    /// Represents the query results.
+    /// </summary>
+    public class QueryJQResult
+    {
+        /// <summary>
+        /// The result string. 
+        /// </summary>
+        public string Result { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// Any exceptions.
+        /// </summary>
+        public string Error { get; set; } = string.Empty;
+    }
     
-     
 }

@@ -68,19 +68,17 @@ It will also contain a folder, with each and every assets' 256x256 PNG thumbnail
 
 ```json
 {
-	"/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin":
-	{
-		"AssetPath": "/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin",
-		"SizeOnDisk": 160872,
-		"AssetType": "/Script/Engine.Skeleton"
-	},
-	"/Game/Characters/Mannequins/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop":
-	{
-		"AssetPath": "/Game/Characters/Mannequins/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop",
-		"SizeOnDisk": 698209,
-		"AssetType": "/Script/Engine.AnimSequence"
-	},
-...
+  "/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin": {
+    "AssetPath": "/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin",
+    "SizeOnDisk": 160872,
+    "AssetType": "/Script/Engine.Skeleton"
+  },
+  "/Game/Characters/Mannequins/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop": {
+    "AssetPath": "/Game/Characters/Mannequins/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop",
+    "SizeOnDisk": 698209,
+    "AssetType": "/Script/Engine.AnimSequence"
+  }
+}
 ``` 
 
 The combination of the JSON and Thumbnails are used to search and display the results on screen.
