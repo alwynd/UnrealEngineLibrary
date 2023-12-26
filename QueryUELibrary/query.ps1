@@ -13,24 +13,24 @@ try {
             $getPath = New-Object Text.StringBuilder(260)
             [IniFile]::GetPrivateProfileString("paths", "UELibraryFolder", "", $getPath, $getPath.Capacity, $iniFilePath) > $null
             $directory = $getPath.ToString()
-            Write-Output "PS using INI File."
+            [Console]::Error.WriteLine("PS using INI File.")
         } catch {
-            Write-Output "PS Error when reading INI File. Details: $($_.Exception.Message)"
+            [Console]::Error.WriteLine("PS Error when reading INI File. Details: $($_.Exception.Message)")
         }
     } else {
-        Write-Output "PS INI File not found."
+        [Console]::Error.WriteLine("PS INI File not found.")
     }
 
     if(!$directory) {
         $directory = "../../../../UELibrary"
-        Write-Output "PS NOT using INI (1)."
+        [Console]::Error.WriteLine("PS NOT using INI (1).")
     }
 } catch {
     $directory = "../../../../UELibrary"
-    Write-Output "PS NOT using INI (2) Error. Details: $($_.Exception.Message)"
+    [Console]::Error.WriteLine("PS NOT using INI (2) Error. Details: $($_.Exception.Message)")
 }
 
-Write-Error "PS using Library folder: $directory"
+[Console]::Error.WriteLine("PS using Library folder: $directory")
 
 $results = @()
 

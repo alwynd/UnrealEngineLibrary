@@ -58,7 +58,7 @@ public class QueryJQ
 
             Logging.Info($"{GetType().Name}.RunCommand: result length: {result.Result.Length}");
             Logging.Debug($"{GetType().Name}.RunCommand: result: {result.Result}");
-            if (!string.IsNullOrEmpty(result.Error)) Logging.Info($"{GetType().Name}.RunCommand: error: {result.Error}");
+            Logging.Info($"{GetType().Name}.RunCommand: error: {result.Error}");
             return result;
         }
         finally
