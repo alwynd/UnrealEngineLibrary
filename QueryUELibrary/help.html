@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: black;
+            color: #D3D3D3;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-weight: bold;
+        }
+        .code-snippet {
+            background-color: #2A2A2A;
+            border: solid thin white;
+            padding: 20px;
+            white-space: pre;
+            color: #D3D3D3;
+        }
+    </style>
+</head>
+<body>
+<h1>Unreal Engine Library JSON Structure</h1>
+<div class="code-snippet">
+    "/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin":<br/>
+    {
+    &nbsp;&nbsp;&nbsp;&nbsp;"AssetPath": "/Game/Characters/Mannequins/Meshes/SK_Mannequin.SK_Mannequin",
+    &nbsp;&nbsp;&nbsp;&nbsp;"SizeOnDisk": 160872,
+    &nbsp;&nbsp;&nbsp;&nbsp;"AssetType": "/Script/Engine.Skeleton"
+    }
+</div>
+<p style='color:white;'>Each JSON file in the UELibrary consists of arrays using this structure.<br/>To query the JSON, use PowerShell Where-Object (examples are included in the main form).<br/>Asset types are derived from Unreal Engine, so you can use PowerShell Where-Object to find unique asset types.<br/><br/>The PowerShell Where-Object query will run against all files in the UELibrary.<br/>Use smart, case insensitive searches when looking for specific asset types, such as 'assettype contains xyz'.<br/>You can also include logical operators like '-and' and '-or' in your search queries.<br/><br/>To refine searches further, combine these techniques with asset names, or even sizes (where the size is the number of bytes on disk).</p>
+<p style='color:white;'>The following assets (and their thumbnails) were extracted and classified from Unreal Engine Projects:
+<ul style='color:white;'>
+    <li>Textures</li>
+    <li>Materials (includes instances)</li>
+    <li>Static/Skeletal Meshes</li>
+    <li>Animations</li>
+    <li>Blueprints</li>
+    <li>Any other Unreal Objects included may not have thumbnails</li>
+</ul>
+</p>
+<p style='color:white;'><b>Query examples:</b><br/>
+    $_.AssetPath -match 'spruce' -and $_.AssetType -match 'staticmesh'<br/>
+    - look for all assets, containing the text 'spruce', where the asset is a static mesh.<br/><br/>
+    $_.SizeOnDisk -gt 104857600<br/>
+    - Look for all assets, where the size on disk, is greater than 100MB<br/><br/>
+    $_.AssetPath -match 'combat.*sword' -and $_.AssetType -match 'animation'<br/>
+    - Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.<br/>
+</p>
+</body>
+</html>
