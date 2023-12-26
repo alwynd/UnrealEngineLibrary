@@ -30,19 +30,24 @@ public class QueryJQ
             // Convert the script to a PowerShell script block
             string scriptTemplate = File.ReadAllText(script);
             string modifiedScript = scriptTemplate.Replace("{QUERY_JQ}", userQuery);
-            string scriptBlock = $"& {{{modifiedScript}}}";
+
+            // Write modifiedScript to a new PowerShell (.ps1) file
+            string tempScriptFile = "_temp.ps1";
+            await File.WriteAllTextAsync(tempScriptFile, modifiedScript);            
+            Logging.Debug($"{GetType().Name}.RunCommand: tempScriptFile: {tempScriptFile}, modifiedScript: {modifiedScript}");
 
             // Set up the process start info
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-ExecutionPolicy Bypass -Command {scriptBlock}",
+                Arguments = $"-ExecutionPolicy Bypass -File {tempScriptFile}",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
-
+            Logging.Debug($"{GetType().Name}.RunCommand: Running Command: powershell.exe -ExecutionPolicy Bypass -File {tempScriptFile}");
+            
             using Process process = new Process { StartInfo = startInfo };
 
             // Execute the process asynchronously and read the output/error

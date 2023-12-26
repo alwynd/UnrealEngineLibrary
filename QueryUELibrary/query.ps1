@@ -1,16 +1,36 @@
 try {
-    if (Test-Path .\config.ini) {
-        $config = ConvertFrom-StringData (Get-Content .\properties.ini -Raw)
-        $directory = $config["paths.UELibraryFolder"]
-    } 
+    $scriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+    $iniFilePath = Join-Path $scriptDir 'properties.ini'
+    if (Test-Path $iniFilePath) {
+        try {
+            Add-Type -TypeDefinition @"
+                using System.Runtime.InteropServices;
+                using System.Text;
+                public class IniFile {
+                    [DllImport("kernel32")] public static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+                }
+"@
+            $getPath = New-Object Text.StringBuilder(260)
+            [IniFile]::GetPrivateProfileString("paths", "UELibraryFolder", "", $getPath, $getPath.Capacity, $iniFilePath) > $null
+            $directory = $getPath.ToString()
+            Write-Output "PS using INI File."
+        } catch {
+            Write-Output "PS Error when reading INI File. Details: $($_.Exception.Message)"
+        }
+    } else {
+        Write-Output "PS INI File not found."
+    }
 
     if(!$directory) {
         $directory = "../../../../UELibrary"
+        Write-Output "PS NOT using INI (1)."
     }
 } catch {
     $directory = "../../../../UELibrary"
+    Write-Output "PS NOT using INI (2) Error. Details: $($_.Exception.Message)"
 }
-Write-Output "PS using Library folder: $directory"
+
+Write-Error "PS using Library folder: $directory"
 
 $results = @()
 
