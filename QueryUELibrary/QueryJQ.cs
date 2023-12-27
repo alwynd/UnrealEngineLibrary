@@ -64,7 +64,7 @@ public class QueryJQ
                     result.Result += (result.Result.Length > 0 ? Environment.NewLine : "") + resultLine;
                     Logging.Info($"{GetType().Name}.RunCommand Output Received (Len): {resultLine.Length}");
                     Logging.Debug($"{GetType().Name}.RunCommand Output Received: {resultLine}");
-                    resultUpdated(resultLine);
+                    resultUpdated?.Invoke(resultLine);
                 }
             });
 
@@ -77,7 +77,7 @@ public class QueryJQ
                     result.Error += (result.Error.Length > 0 ? Environment.NewLine : "") + errorLine; 
                     Logging.Info($"{GetType().Name}.RunCommand Error Received (Len): {errorLine.Length}");
                     Logging.Debug($"{GetType().Name}.RunCommand Error Received: {errorLine}");
-                    errorUpdated(errorLine);
+                    errorUpdated?.Invoke(errorLine);
                 }
             });
 
@@ -88,7 +88,7 @@ public class QueryJQ
             Logging.Info($"{GetType().Name}.RunCommand: result length: {result.Result.Length}");
             Logging.Debug($"{GetType().Name}.RunCommand: result: {result.Result}");
             Logging.Info($"{GetType().Name}.RunCommand: error: {result.Error}");
-            completed();
+            completed?.Invoke();
             return result;
         }
         finally
