@@ -52,15 +52,30 @@ namespace QueryUELibrary
         public readonly ToolStripStatusLabel StatusLabel = new ToolStripStatusLabel();
         
         /// <summary>
+        /// The results label.
+        /// </summary>
+        public readonly Label resultsLabel = new Label();
+
+        /// <summary>
+        /// The results panel.
+        /// </summary>
+        public readonly Panel resultsPanel = new Panel();
+        
+        /// <summary>
+        /// The results scrolling panel.
+        /// </summary>
+        public readonly FlowLayoutPanel resultsScrollContainer = new FlowLayoutPanel();
+
+        
+        /// <summary>
         /// The help button.
         /// </summary>
         public readonly Button HTMLHelpButton = new Button();
-        
 
         private List<UEJson> UEObjects = new List<UEJson>();
-
         private Action QueryCompleted;
 
+        
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -225,6 +240,32 @@ namespace QueryUELibrary
             ExamplesButton.SetBounds(HTMLHelpButton.Right + 10, HTMLHelpButton.Top, 100, 45);
             this.Controls.Add(ExamplesButton);                        
             
+            
+            // Creating new label for "Results"
+            resultsLabel.Text = "Results:";
+            resultsLabel.Font = new Font(resultsLabel.Font, FontStyle.Bold);
+            resultsLabel.ForeColor = foreColor;
+            resultsLabel.BackColor = backColor;
+            resultsLabel.SetBounds(10, ExamplesButton.Bottom + 15, ClientSize.Width - 20, 20); 
+            this.Controls.Add(resultsLabel);
+            
+            // Creating new scrollable panel for results
+            // Add this line to give the panel a border
+            // Replace this with a slightly darker color
+            resultsPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            resultsPanel.SetBounds(10, resultsLabel.Bottom + 10, ClientSize.Width - 20, ClientSize.Height - QueryButton.Bottom - 75);
+            resultsPanel.BorderStyle = BorderStyle.FixedSingle;
+            resultsPanel.BackColor = Color.FromArgb(27, 27, 28); // Darker shade of your existing backColor (37, 37, 38)
+            resultsPanel.ForeColor = foreColor; 
+            
+            // Create a FlowLayoutPanel for vertical scrolling
+            // Add the flowLayoutPanel to the resultsPanel            
+            resultsScrollContainer.Dock = DockStyle.Fill;
+            resultsScrollContainer.AutoScroll = true;
+            resultsScrollContainer.WrapContents = false;
+            resultsScrollContainer.FlowDirection = FlowDirection.TopDown;
+            resultsPanel.Controls.Add(resultsScrollContainer);            
+            this.Controls.Add(resultsPanel);            
         }
 
         /// <summary>
