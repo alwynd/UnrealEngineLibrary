@@ -91,6 +91,12 @@ namespace QueryUELibrary
             // Creating an instance of QueryJQ
             var queryJq = new QueryUELibrary.QueryJQ();
 
+            Color backColor = Color.FromArgb(37, 37, 38);
+            Color foreColor = Color.FromArgb(204, 204, 204);
+
+            Color buttonColor = Color.FromArgb(55, 55, 56);
+            Color buttonForeColor = Color.FromArgb(204, 204, 204);            
+            
             // Display the dialog with "Busy..." text.
             var busyDialog = new System.Windows.Forms.Form()
             {
@@ -99,10 +105,15 @@ namespace QueryUELibrary
                 StartPosition = FormStartPosition.CenterScreen,
                 Text = "Processing...",
                 FormBorderStyle = FormBorderStyle.Sizable, // Make the form resizable
+                BackColor = backColor,
+                ForeColor = foreColor,
             };
 
             StatusStrip statusBar = new StatusStrip();
             ToolStripStatusLabel statusLabel = new ToolStripStatusLabel();
+            statusBar.BackColor = buttonColor;
+            statusBar.ForeColor = buttonForeColor;            
+            
             statusBar.Items.Add(statusLabel);            
             busyDialog.Controls.Add(statusBar);
             
@@ -112,14 +123,24 @@ namespace QueryUELibrary
 
             // Set up result label and textbox
             var resultLabel = new Label { Text = "Result:", Dock = DockStyle.Top };
+            resultLabel.BackColor = backColor;
+            resultLabel.ForeColor = foreColor;            
+            
             var resultTextBox = new TextBox { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill, ScrollBars = ScrollBars.Vertical };
+            resultTextBox.BackColor = backColor;
+            resultTextBox.ForeColor = foreColor;            
             splitContainer.Panel1.Controls.AddRange(new Control[] { resultTextBox, resultLabel });
 
             // Set up error label and textbox
             var errorLabel = new Label { Text = "Error:", Dock = DockStyle.Top };
+            errorLabel.BackColor = backColor;
+            errorLabel.ForeColor = foreColor;            
+            
             var errorTextBox = new TextBox { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill, ScrollBars = ScrollBars.Vertical };
+            errorTextBox.BackColor = backColor;
+            errorTextBox.ForeColor = foreColor;            
+            
             splitContainer.Panel2.Controls.AddRange(new Control[] { errorTextBox, errorLabel });
-
             busyDialog.Controls.Add(splitContainer);
 
             // Add a terminate button
@@ -128,6 +149,8 @@ namespace QueryUELibrary
                 Text = "TERMINATE",
                 Dock = DockStyle.Bottom,
             };
+            terminate.BackColor = buttonColor;
+            terminate.ForeColor = buttonForeColor;            
             terminate.Click += (s, e) => { Application.Exit(); };
             busyDialog.Controls.Add(terminate);
             
@@ -137,6 +160,8 @@ namespace QueryUELibrary
                 Text = "Close",
                 Dock = DockStyle.Bottom,
             };
+            closeButton.BackColor = buttonColor;
+            closeButton.ForeColor = buttonForeColor;            
             closeButton.Click += (s, e) => { busyDialog.Close(); };
             busyDialog.Controls.Add(closeButton);
 
