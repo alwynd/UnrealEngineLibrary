@@ -38,9 +38,17 @@ namespace QueryUELibrary
             {
                 JQQuery.Text =
                     "Remember, ONLY 1 Object-Where query is allowed at a time, the below is just examples of such queries, submitting this \"as is\" will result in an error\r\n" +
-                    "$_.AssetPath -match \"spruce\" -and $_.AssetType -match \"staticmesh\"\r\n\t # - look for all assets, containing the text \"spruce\", where the asset is a static mesh.\r\n\r\n" +
-                    "$_.SizeOnDisk -gt 104857600\r\n\t #- Look for all assets, where the size on disk, is greater than 100MB.\r\n\r\n" +
-                    "$_.AssetPath -match \"slash.*sword\" -and $_.AssetType -match \"anim\"\r\n\t #- Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.";
+                    "# Look for all assets, containing the text \"spruce\", where the asset is a static mesh.\r\n" +
+                    "$_.AssetPath -match \"spruce\" -and $_.AssetType -match \"staticmesh\"\r\n\r\n" +
+                    
+                    "# Look for all assets, where the size on disk, is greater than 100MB.\r\n" +
+                    "$_.SizeOnDisk -gt 104857600\r\n\r\n" +
+                    
+                    "# Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.\r\n" +
+                    "$_.AssetPath -match \"slash.*sword\" -and $_.AssetType -match \"anim\"\r\n\r\n" +
+
+                    "# More complex queries are also possible.\r\n" +
+                    "($_.AssetPath -match 'armor' -and $_.AssetType -match 'static|skeletal') -or ($_.AssetPath -match 'combat' -and $_.AssetType -match 'anim')";
             };
 
             // html help.
@@ -73,7 +81,7 @@ namespace QueryUELibrary
         /// </summary>
         private void Query()
         {
-
+            Logging.Debug($"{GetType().Name}.Query:-- START");
             if (string.IsNullOrEmpty(JQQuery.Text))
             {
                 JQQuery.Text = "Put some text here, use \"Examples\" if not sure.";
@@ -93,6 +101,11 @@ namespace QueryUELibrary
                 FormBorderStyle = FormBorderStyle.Sizable, // Make the form resizable
             };
 
+            StatusStrip statusBar = new StatusStrip();
+            ToolStripStatusLabel statusLabel = new ToolStripStatusLabel();
+            statusBar.Items.Add(statusLabel);            
+            busyDialog.Controls.Add(statusBar);
+            
             // Set up split container
             var splitContainer = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, BorderStyle = BorderStyle.FixedSingle };
             splitContainer.SplitterDistance = (int)(busyDialog.Height * .75);
@@ -129,7 +142,24 @@ namespace QueryUELibrary
 
             busyDialog.Shown += async (o, e) =>
             {
-                var result = await queryJq.RunCommand(ScriptPath.Text, JQQuery.Text);
+                var result = await queryJq.RunCommand(ScriptPath.Text, JQQuery.Text,
+                    result => BeginInvoke((Action)(() =>
+                    {
+                        resultTextBox.Text += result + Environment.NewLine;
+                        statusLabel.Text = $"Output: {ToReadableSize(resultTextBox.Text.Length)}, Error: {ToReadableSize(errorTextBox.Text.Length)}, Processing..";
+                    })),
+                    error => BeginInvoke((Action)(() =>
+                    {
+                        errorTextBox.Text += error + Environment.NewLine;
+                        errorTextBox.SelectionStart = errorTextBox.Text.Length;
+                        statusLabel.Text = $"Output: {ToReadableSize(resultTextBox.Text.Length)}, Error: {ToReadableSize(errorTextBox.Text.Length)}, Processing..";
+                        errorTextBox.ScrollToCaret();
+                    })),
+                    () => BeginInvoke((Action)(() =>
+                    {
+                        statusLabel.Text = $"Output: {ToReadableSize(resultTextBox.Text.Length)}, Error: {ToReadableSize(errorTextBox.Text.Length)}, Completed.";
+                    }))
+                );
 
                 resultTextBox.Text = result.Result;
                 errorTextBox.Text = result.Error;
@@ -139,5 +169,21 @@ namespace QueryUELibrary
 
             busyDialog.ShowDialog();
         }
+        
+        /// <summary>
+        /// Format number.
+        /// </summary>
+        public static string ToReadableSize(int length)
+        {
+            var sizes = new[] { "B", "KB", "MB", "GB" };
+            double len = length;
+            int order = 0;
+            while (len >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                len /= 1024;
+            }
+            return $"{len:0.##} {sizes[order]}".PadLeft(10);
+        }        
     }
 }

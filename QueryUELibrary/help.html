@@ -40,19 +40,30 @@
     <li>Any other Unreal Objects included may not have thumbnails</li>
 </ul>
 </p>
+
 <p style='color:white;'><b>Query examples:</b><br/>
-    $_.AssetPath -match 'spruce' -and $_.AssetType -match 'staticmesh'<br/>
-    - look for all assets, containing the text 'spruce', where the asset is a static mesh.<br/><br/>
-    $_.SizeOnDisk -gt 104857600<br/>
-    - Look for all assets, where the size on disk, is greater than 100MB<br/><br/>
-    $_.AssetPath -match 'slash.*sword' -and $_.AssetType -match 'anim'<br/>
-    - Look for all assets, where the name regex matches combat and sword, where the asset type is an animation.<br/>
-    $_.AssetPath -match 'sword|shield' -and $_.AssetType -match 'anim|sound'<br/>
-    - Look for all assets, where the name regex matches sword or shield, where the asset type is an animation, or a sound.<br/>
-    $_.AssetPath -match 'cave.*ambient|ambient.*cave' -and $_.AssetType -match 'sound'<br/>
-    - Look for all ambient cave sounds<br/>
-    ($_.AssetPath -match 'armor' -and $_.AssetType -match 'static|skeletal') -or ($_.AssetPath -match 'combat' -and $_.AssetType -match 'anim')<br/>
-    - Look for more complex stuff.<br/>
+    - look for all assets, containing the text 'spruce', where the asset is a static mesh.<br/>
+<div class="code-snippet">
+    $_.AssetPath -match 'spruce' -and $_.AssetType -match 'staticmesh'
+</div><br/>
+- Look for all assets, where the size on disk, is greater than 100MB<br/>
+<div class="code-snippet">
+    $_.SizeOnDisk -gt 104857600
+</div><br/>
+- Look for all assets, where the name regex matches sword or shield, where the asset type is an animation, or a sound.<br/>
+<div class="code-snippet">
+    $_.AssetPath -match 'sword|shield' -and $_.AssetType -match 'anim|sound'
+</div><br/>
+- Look for all ambient cave sounds<br/>
+<div class="code-snippet">
+    $_.AssetPath -match 'cave.*ambient|ambient.*cave' -and $_.AssetType -match 'sound'
+</div><br/>
+- Look for more complex stuff.<br/>
+<div class="code-snippet">
+    ($_.AssetPath -match 'armor' -and $_.AssetType -match 'static|skeletal') -or ($_.AssetPath -match 'combat' -and $_.AssetType -match 'anim')
+</div><br/>
+
 </p>
+
 </body>
 </html>
