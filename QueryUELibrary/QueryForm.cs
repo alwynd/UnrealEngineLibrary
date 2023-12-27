@@ -74,7 +74,6 @@ namespace QueryUELibrary
 
         private List<UEJson> UEObjects = new List<UEJson>();
         private Action QueryCompleted;
-
         
         /// <summary>
         /// Default constructor.
@@ -265,7 +264,40 @@ namespace QueryUELibrary
             resultsScrollContainer.WrapContents = false;
             resultsScrollContainer.FlowDirection = FlowDirection.TopDown;
             resultsPanel.Controls.Add(resultsScrollContainer);            
-            this.Controls.Add(resultsPanel);            
+            this.Controls.Add(resultsPanel);
+
+            this.Shown += async (o, e) =>
+            {
+                await LoadImages();
+            };
+        }
+
+        /// <summary>
+        /// Loads the image paths.
+        /// </summary>
+        private async Task LoadImages()
+        {
+            try
+            {
+                await UEImageLibrary.Instance.Initialize(
+                    progress => BeginInvoke((Action)(() =>
+                    {
+                        // update image counts, as they get loaded/discovered
+                        StatusLabel.Text = $"{Version}, Discovering Thumbnails... Found {progress} Images...";
+                    })),
+                    () => BeginInvoke((Action)(() =>
+                    {
+                        // complete
+                        StatusLabel.Text = $"{Version}, Found {UEImageLibrary.Instance.UELibraryImages.Count} Thumbnails.";
+                    }))
+                );
+            }
+            catch (Exception ex)
+            {
+                Logging.Error(ex, $"{GetType().Name}.LoadImages Error.");
+                StatusLabel.Text = $"{Version}, Exception occurred while loading thumbnails, check log for details.";
+                ErrorDialog errorDialog = new ErrorDialog($"Exception occurred while loading thumbnails: {ex}"); errorDialog.ShowDialog();
+            }
         }
 
         /// <summary>
@@ -282,6 +314,17 @@ namespace QueryUELibrary
         private void Query()
         {
             Logging.Debug($"{GetType().Name}.Query:-- START");
+            if (!UEImageLibrary.Instance.Initialized)
+            {
+                JQQuery.Text = "Thumbnail paths are not completely loaded yet.";
+                return;
+            }
+            if (UEImageLibrary.Instance.UELibraryImages.Count < 1)
+            {
+                JQQuery.Text = "Thumbnails repository is not on disk, check the UELibrary path/ini settings.";
+                return;
+            }
+            
             if (string.IsNullOrEmpty(JQQuery.Text))
             {
                 JQQuery.Text = "Put some text here, use \"Examples\" if not sure.";
@@ -456,4 +499,54 @@ namespace QueryUELibrary
             return $"{len:0.##} {sizes[order]}".PadLeft(10);
         }        
     }
+    
+    /// <summary>
+    /// meh
+    /// </summary>
+    public class ErrorDialog : Form
+    {
+        /// <summary>
+        /// more meh
+        /// </summary>
+        public ErrorDialog(string errorMessage)
+        {
+            // Dialog title and size
+            Text = "Error";
+            ClientSize = new Size(800, 600);
+            StartPosition = FormStartPosition.CenterScreen;
+
+            // RichTextBox to display the error message
+            RichTextBox messageBox = new RichTextBox
+            {
+                ReadOnly = true,
+                Dock = DockStyle.Fill,
+                Text = errorMessage,
+                BackColor = SystemColors.Control,
+                BorderStyle = BorderStyle.None,
+                ScrollBars = RichTextBoxScrollBars.Vertical,
+                ContextMenuStrip = new ContextMenuStrip()
+            };            
+
+            // "Close" Button to close the dialog
+            Button closeButton = new Button
+            {
+                Text = "Close",
+                Dock = DockStyle.Bottom,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(5)
+            };
+
+            closeButton.Click += (sender, e) => Close();
+        
+            // Add controls to form
+            Controls.Add(messageBox);
+            Controls.Add(closeButton);
+
+            // Set the icon to the error icon
+            Icon = SystemIcons.Error;
+
+            // Allow copying the message
+            messageBox.ContextMenuStrip.Items.Add("Copy", null, (_, _) => Clipboard.SetText(messageBox.Text));
+        }
+    }    
 }

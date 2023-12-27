@@ -1,0 +1,80 @@
+﻿using System.Collections.Concurrent;
+using IniParser;
+using IniParser.Model;
+
+namespace QueryUELibrary;
+
+/// <summary>
+/// Provides the images.
+/// </summary>
+public class UEImageLibrary
+{
+    /// <summary>
+    /// The singleton instance.
+    /// </summary>
+    public static readonly UEImageLibrary Instance = new UEImageLibrary();
+
+    /// <summary>
+    /// The UE Library path.
+    /// </summary>
+    public static string UELibraryPath { get; private set; } = defaultUELibraryPath; 
+
+    /// <summary>
+    /// The images.
+    /// </summary>
+    public ConcurrentDictionary<string, long> UELibraryImages { get; private set; } = new ConcurrentDictionary<string, long>();
+
+    /// <summary>
+    /// Initialized?
+    /// </summary>
+    public bool Initialized { get; private set; } = false;
+
+    private static readonly string defaultUELibraryPath = "../../../../UELibrary";
+    private static readonly string propertiesIni = "properties.ini";
+    private bool inProgress = false;
+    
+
+    /// <summary>
+    /// Private constructor.
+    /// </summary>
+    private UEImageLibrary() { }
+
+    /// <summary>
+    /// Initializes this.
+    /// </summary>
+    public async Task Initialize(Action<int> progress, Action complete)
+    {
+        if (inProgress) return;
+        inProgress = true;
+
+        try
+        {
+            Initialized = false;
+            Logging.Debug($"{GetType().Name}.Initialize:-- START");
+            var parser = new FileIniDataParser();
+            if (File.Exists(propertiesIni))
+            {
+                IniData data = parser.ReadFile(propertiesIni);
+                UELibraryPath = data["paths"]["UELibraryFolder"];
+                if (string.IsNullOrWhiteSpace(UELibraryPath))
+                {
+                    UELibraryPath = defaultUELibraryPath;
+                }
+            }
+            Logging.Debug($"{GetType().Name}.Initialize UELibraryPath: {UELibraryPath}, Exists: {Directory.Exists(UELibraryPath)}");
+            if (!Directory.Exists(UELibraryPath))
+            {
+                throw new Exception($"UELibrary path: '{UELibraryPath}' does not exist.");
+            }
+            
+            Logging.Debug($"{GetType().Name}.Initialize UELibraryPath: {UELibraryPath}, UELibraryImages: {UELibraryImages.Count}");
+            Initialized = true;
+            complete?.Invoke();
+        }
+        finally
+        {
+            inProgress = false;
+        }
+    }
+    
+}

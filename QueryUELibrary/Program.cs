@@ -13,7 +13,6 @@ namespace QueryUELibrary
         static void Main()
         {
             Logging.Info($"{typeof(Program).Name}:-- START, starting up..");
-            
             System.Windows.Forms.Application.ApplicationExit += (sender, e) =>
             {
                 System.Console.WriteLine("Shutting down...");
