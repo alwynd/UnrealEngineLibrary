@@ -268,7 +268,7 @@ namespace QueryUELibrary
 
             this.Shown += async (o, e) =>
             {
-                await LoadImages();
+                await Task.Run(LoadImages);
             };
         }
 

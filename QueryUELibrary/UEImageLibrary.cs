@@ -67,6 +67,22 @@ public class UEImageLibrary
                 throw new Exception($"UELibrary path: '{UELibraryPath}' does not exist.");
             }
             
+            var allFiles = Directory.EnumerateFiles(UELibraryPath, "*.png", SearchOption.AllDirectories);
+            var fileBatches = allFiles
+                .Select((x, i) => new { File = x, Index = i })
+                .GroupBy(x => x.Index / 512)  // adjust the batch size according to your performance requirement.
+                .Select(g => g.Select(x => x.File));
+
+            Parallel.ForEach(fileBatches, (files) => 
+            {
+                foreach (var file in files)
+                {
+                    var fileInfo = new FileInfo(file);
+                    UELibraryImages.TryAdd(file, fileInfo.Length);
+                }
+                progress?.Invoke(UELibraryImages.Count);
+            });            
+            
             Logging.Debug($"{GetType().Name}.Initialize UELibraryPath: {UELibraryPath}, UELibraryImages: {UELibraryImages.Count}");
             Initialized = true;
             complete?.Invoke();
