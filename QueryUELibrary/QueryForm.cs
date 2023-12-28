@@ -305,7 +305,7 @@ namespace QueryUELibrary
         private async void OnQueryCompleted()
         {
             Logging.Debug($"{GetType().Name}.OnQueryCompleted:-- START");
-            UEObjects.Sort((x, y) => string.Compare(x.AssetPath, y.AssetPath));
+            UEObjects.Sort((x, y) => string.Compare(x.AssetPath.ToLower().Split(".").Last(), y.AssetPath.ToLower().Split(".").Last()));
 
             // Color scheme
             Color backColor = Color.FromArgb(37, 37, 38);
@@ -317,7 +317,7 @@ namespace QueryUELibrary
 
             await Task.Run(() =>
             {
-                var panels = UEObjects.AsParallel()
+                var panels = UEObjects.AsParallel().AsOrdered()
                 .Where(ueObject =>
                 {
                     // Find the corresponding image file path in UELibraryImages based on AssetPath
@@ -393,7 +393,7 @@ namespace QueryUELibrary
                     panel.Controls.Add(label);
                     panel.Height = pictureBox.Height + label.Height + panel.BorderThickness * 2; //Modify the panel height to fit the pictureBox and label
                     return panel;
-                });
+                }).ToList();
                 
                 this.Invoke((Action) (() =>
                 {
