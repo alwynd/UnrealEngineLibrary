@@ -302,9 +302,22 @@ namespace QueryUELibrary
             }
         }
 
+        /// <summary>
+        /// The query completed.
+        /// </summary>
         private async void OnQueryCompleted()
         {
             Logging.Debug($"{GetType().Name}.OnQueryCompleted:-- START");
+
+            if (UEObjects.Count > 256)
+            {
+                Logging.Info($"{GetType().Name}.OnQueryCompleted Too many results.");
+                ErrorDialog errorDialog = new ErrorDialog($"Your query returned too many results, refine your search query. ONLY showing the 1st 256.");
+                errorDialog.ShowDialog();
+                UEObjects.RemoveRange(256, UEObjects.Count - 256);
+            }
+            StatusLabel.Text = $"{Version}, Loading {UEObjects.Count} Thumbnails";
+            
             UEObjects.Sort((x, y) => string.Compare(x.AssetPath.ToLower().Split(".").Last(), y.AssetPath.ToLower().Split(".").Last()));
 
             // Color scheme
@@ -401,6 +414,7 @@ namespace QueryUELibrary
                     {
                         resultsScrollContainer.Controls.Add(panel);
                     }
+                    StatusLabel.Text = $"{Version}";
                 }));
                 
             });

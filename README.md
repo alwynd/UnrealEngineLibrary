@@ -5,7 +5,14 @@
 ---
 
 ## Screenshot:
+The Tool UI:
+
 ![Screenshot](screenshot.png)
+
+<br/>
+It will also show the JSON results, for any matches found:
+
+![Screenshot2](screenshot2.png)
 
 ## Introduction
 
