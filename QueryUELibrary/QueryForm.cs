@@ -258,11 +258,13 @@ namespace QueryUELibrary
             resultsPanel.ForeColor = foreColor; 
             
             // Create a FlowLayoutPanel for vertical scrolling
-            // Add the flowLayoutPanel to the resultsPanel            
+            // Add the flowLayoutPanel to the resultsPanel
             resultsScrollContainer.Dock = DockStyle.Fill;
             resultsScrollContainer.AutoScroll = true;
-            resultsScrollContainer.WrapContents = false;
-            resultsScrollContainer.FlowDirection = FlowDirection.TopDown;
+            resultsScrollContainer.WrapContents = true;
+            resultsScrollContainer.FlowDirection = FlowDirection.LeftToRight;
+            resultsScrollContainer.AutoSize = false;
+            resultsScrollContainer.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             resultsPanel.Controls.Add(resultsScrollContainer);            
             this.Controls.Add(resultsPanel);
 
@@ -300,12 +302,110 @@ namespace QueryUELibrary
             }
         }
 
-        /// <summary>
-        /// Indicates the query has completed.
-        /// </summary>
-        private void OnQueryCompleted()
+        private async void OnQueryCompleted()
         {
             Logging.Debug($"{GetType().Name}.OnQueryCompleted:-- START");
+            UEObjects.Sort((x, y) => string.Compare(x.AssetPath, y.AssetPath));
+
+            // Color scheme
+            Color backColor = Color.FromArgb(37, 37, 38);
+            Color foreColor = Color.FromArgb(204, 204, 204);
+            Color hoverBorderColor = Color.White;
+
+            // Clear/Remove any child components in the resultsScrollContainer
+            resultsScrollContainer.Controls.Clear();
+
+            await Task.Run(() =>
+            {
+                var panels = UEObjects.AsParallel()
+                .Where(ueObject =>
+                {
+                    // Find the corresponding image file path in UELibraryImages based on AssetPath
+                    var matchingImagePath = UEImageLibrary.Instance.UELibraryImages.Keys.FirstOrDefault(key =>
+                    {
+                        return key.ToLower().Replace("\\", "/").Replace(".png", "")
+                            .EndsWith(ueObject.AssetPath.ToLower().Replace("\\", "/"));
+                    });
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted looking for: ueObject.AssetPath: {ueObject.AssetPath}, AssetType: {ueObject.AssetType}, SizeOnDisk: {FormatNumber(ueObject.SizeOnDisk)}, matchingImagePath: {matchingImagePath}");
+
+                    return (matchingImagePath != null);
+                })
+                .Select(ueObject =>
+                {
+                    var matchingImagePath = UEImageLibrary.Instance.UELibraryImages.Keys.FirstOrDefault(key =>
+                    {
+                        return key.ToLower().Replace("\\", "/").Replace(".png", "")
+                            .EndsWith(ueObject.AssetPath.ToLower().Replace("\\", "/"));
+                    });
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted FOUND: ueObject.AssetPath: {ueObject.AssetPath}, AssetType: {ueObject.AssetType}, SizeOnDisk: {FormatNumber(ueObject.SizeOnDisk)}, matchingImagePath: {matchingImagePath}");
+
+                    var panel = new CustomPanel
+                    {
+                        Width = 256,
+                        BackColor = backColor,
+                        ForeColor = foreColor,
+                    };
+
+                    // create a new PictureBox
+                    var pictureBox = new PictureBox
+                    {
+                        Image = Image.FromFile(matchingImagePath),
+                        Width = panel.Width -
+                                panel.BorderThickness * 2, // Lessen the width to allow for the custom border
+                        Height = 256 - panel.BorderThickness * 2, // Lessen the height to allow for the custom border
+                        BackColor = backColor,
+                        BorderStyle = BorderStyle.None, // Set border to none as we're using a custom border
+                        Location = new Point(panel.BorderThickness, panel.BorderThickness) // Shift the picture box inside to expose the custom border
+                    };
+
+                    panel.Controls.Add(pictureBox);
+
+                    var label = new Label
+                    {
+                        Text = $"{ueObject.AssetPath.Split(".").Last()}\r\n" +
+                               $"{ueObject.AssetType.Replace("\\", "/").Split("/").Last().Split(".").Last()}, {FormatNumber(ueObject.SizeOnDisk)}",
+                        Width = pictureBox.Width, Location = new Point(panel.BorderThickness, pictureBox.Height + panel.BorderThickness), // Position the label just below the PictureBox
+                        AutoSize = true,
+                        BackColor = backColor,
+                        ForeColor = foreColor,
+                    };
+
+                    // Attach hover event handlers to highlight border on hover
+                    Action<object, EventArgs> mouseEnter = (s, e) =>
+                    {
+                        panel.BorderColor = hoverBorderColor;
+                        panel.Invalidate();
+                    };
+                    Action<object, EventArgs> mouseLeave = (s, e) =>
+                    {
+                        panel.BorderColor = Color.Black;
+                        panel.Invalidate();
+                    };
+
+                    panel.MouseEnter += new EventHandler(mouseEnter);
+                    pictureBox.MouseEnter += new EventHandler(mouseEnter);
+                    label.MouseEnter += new EventHandler(mouseEnter);
+
+                    panel.MouseLeave += new EventHandler(mouseLeave);
+                    pictureBox.MouseLeave += new EventHandler(mouseLeave);
+                    label.MouseLeave += new EventHandler(mouseLeave);
+
+                    panel.Controls.Add(label);
+                    panel.Height = pictureBox.Height + label.Height + panel.BorderThickness * 2; //Modify the panel height to fit the pictureBox and label
+                    return panel;
+                });
+                
+                this.Invoke((Action) (() =>
+                {
+                    foreach (var panel in panels)
+                    {
+                        resultsScrollContainer.Controls.Add(panel);
+                    }
+                }));
+                
+            });
+
+            Logging.Debug($"{GetType().Name}.OnQueryCompleted:-- END");
         }
 
         /// <summary>
@@ -415,11 +515,7 @@ namespace QueryUELibrary
             {
                 // run the query, update the text as we get it back
                 var result = await queryJq.RunCommand(ScriptPath.Text, JQQuery.Text,
-                    result => BeginInvoke((Action)(() =>
-                    {
-                        resultTextBox.Text += result + Environment.NewLine;
-                        statusLabel.Text = $"Output: {FormatNumber(resultTextBox.Text.Length)}, Error: {FormatNumber(errorTextBox.Text.Length)}, Processing..";
-                    })),
+                    null,
                     error => BeginInvoke((Action)(() =>
                     {
                         statusLabel.Text = $"Output: {FormatNumber(resultTextBox.Text.Length)}, Error: {FormatNumber(errorTextBox.Text.Length)}, Processing..";
@@ -547,6 +643,32 @@ namespace QueryUELibrary
 
             // Allow copying the message
             messageBox.ContextMenuStrip.Items.Add("Copy", null, (_, _) => Clipboard.SetText(messageBox.Text));
+        }
+    }
+    
+    /// <summary>
+    /// Custom panel.
+    /// </summary>
+    public class CustomPanel : Panel
+    {
+        /// <summary>
+        /// A custom border color.
+        /// </summary>
+        public Color BorderColor { get; set; } = Color.Black;
+        
+        /// <summary>
+        /// The border thickness.
+        /// </summary>
+        public int BorderThickness { get; set; } = 2;
+
+        /// <inheritdoc/>
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            ControlPaint.DrawBorder(e.Graphics, e.ClipRectangle, 
+                this.BorderColor, this.BorderThickness, ButtonBorderStyle.Solid,
+                this.BorderColor, this.BorderThickness, ButtonBorderStyle.Solid,
+                this.BorderColor, this.BorderThickness, ButtonBorderStyle.Solid,
+                this.BorderColor, this.BorderThickness, ButtonBorderStyle.Solid);
         }
     }    
 }

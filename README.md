@@ -4,6 +4,9 @@
 
 ---
 
+## Screenshot:
+![Screenshot](screenshot.png)
+
 ## Introduction
 
 This Windows tool allows querying Unreal Engine projects for asset information, including:
@@ -121,7 +124,5 @@ so the process does work, but you have to understand Unreal Engine migration in 
 ## Future Work
 
 In the future, this tool aims to:
-
-- Enable search and display
 - Allow easy copying of content from UE Library/Repo into an UE project using Azure azcopy
 - Include custom copy facilities, such as disk/network.

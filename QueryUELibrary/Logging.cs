@@ -36,6 +36,6 @@ public static class Logging
     /// </summary>
     private static void Log(string level, string msg)
     {
-        Console.WriteLine($"Current DateTime: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} {level} {msg}");
+        Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} {level} {msg}");
     }
 }

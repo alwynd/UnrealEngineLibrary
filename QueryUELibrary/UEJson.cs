@@ -13,7 +13,7 @@ public class UEJson
     /// <summary>
     /// The asset sized on disk in bytes. 
     /// </summary>
-    public long SizeOnDisk { get; set; }
+    public int SizeOnDisk { get; set; }
     
     /// <summary>
     /// The asset type, as per Unreal Engine.
