@@ -360,6 +360,9 @@ namespace QueryUELibrary
                         ForeColor = foreColor,
                     };
 
+                    ToolTip toolTip = new ToolTip();  // Create a new ToolTip instance
+                    toolTip.SetToolTip(panel, ueObject.AssetPath);  // Set the tooltip text for the panel
+                    
                     // create a new PictureBox
                     var pictureBox = new PictureBox
                     {
@@ -371,6 +374,7 @@ namespace QueryUELibrary
                         BorderStyle = BorderStyle.None, // Set border to none as we're using a custom border
                         Location = new Point(panel.BorderThickness, panel.BorderThickness) // Shift the picture box inside to expose the custom border
                     };
+                    toolTip.SetToolTip(pictureBox, ueObject.AssetPath);  // Set the tooltip text for the panel
 
                     panel.Controls.Add(pictureBox);
 
@@ -383,17 +387,20 @@ namespace QueryUELibrary
                         BackColor = backColor,
                         ForeColor = foreColor,
                     };
+                    
 
                     // Attach hover event handlers to highlight border on hover
                     Action<object, EventArgs> mouseEnter = (s, e) =>
                     {
                         panel.BorderColor = hoverBorderColor;
                         panel.Invalidate();
+                        toolTip.Active = true;   // Activate the tooltip when the mouse enters
                     };
                     Action<object, EventArgs> mouseLeave = (s, e) =>
                     {
                         panel.BorderColor = Color.Black;
                         panel.Invalidate();
+                        toolTip.Active = false;   // Activate the tooltip when the mouse enters
                     };
 
                     panel.MouseEnter += new EventHandler(mouseEnter);
