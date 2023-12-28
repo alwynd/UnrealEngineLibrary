@@ -355,6 +355,7 @@ namespace QueryUELibrary
                     var panel = new CustomPanel
                     {
                         Width = 256,
+                        Height = 300,
                         BackColor = backColor,
                         ForeColor = foreColor,
                     };
@@ -375,7 +376,7 @@ namespace QueryUELibrary
 
                     var label = new Label
                     {
-                        Text = $"{ueObject.AssetPath.Split(".").Last()}\r\n" +
+                        Text = $"{ueObject.AssetPath.Replace("\\", "/").Split("/")[2]}\r\n{ueObject.AssetPath.Split(".").Last()}\r\n" +
                                $"{ueObject.AssetType.Replace("\\", "/").Split("/").Last().Split(".").Last()}, {FormatNumber(ueObject.SizeOnDisk)}",
                         Width = pictureBox.Width, Location = new Point(panel.BorderThickness, pictureBox.Height + panel.BorderThickness), // Position the label just below the PictureBox
                         AutoSize = true,
@@ -491,7 +492,7 @@ namespace QueryUELibrary
             splitContainer.Panel1.Controls.AddRange(new Control[] { resultTextBox, resultLabel });
 
             // Set up error label and textbox
-            var errorLabel = new Label { Text = "Error:", Dock = DockStyle.Top };
+            var errorLabel = new Label { Text = "Messages:", Dock = DockStyle.Top };
             errorLabel.BackColor = backColor;
             errorLabel.ForeColor = foreColor;            
             
