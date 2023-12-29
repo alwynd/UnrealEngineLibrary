@@ -92,14 +92,11 @@ namespace QueryUELibrary
             // Goto URL.
             ScriptPathLabel.Click += (sender, args) =>
             {
-                Process.Start(new ProcessStartInfo("cmd", $"/c start https://learn.microsoft.com/en-us/powershell/")
-                    { CreateNoWindow = true });
+                Process.Start(new ProcessStartInfo("cmd", $"/c start https://learn.microsoft.com/en-us/powershell/") { CreateNoWindow = true });
             };
             QueryInputLabel.Click += (sender, args) =>
             {
-                Process.Start(new ProcessStartInfo("cmd",
-                        $"/c start https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/where-object")
-                    { CreateNoWindow = true });
+                Process.Start(new ProcessStartInfo("cmd", $"/c start https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/where-object") { CreateNoWindow = true });
             };
 
             // Update the query text with some examples.
@@ -281,6 +278,7 @@ namespace QueryUELibrary
         {
             try
             {
+                UEProjectCSV.Initialize();
                 await UEImageLibrary.Instance.Initialize(
                     progress => BeginInvoke((Action)(() =>
                     {
@@ -374,7 +372,21 @@ namespace QueryUELibrary
                         BorderStyle = BorderStyle.None, // Set border to none as we're using a custom border
                         Location = new Point(panel.BorderThickness, panel.BorderThickness) // Shift the picture box inside to expose the custom border
                     };
-                    toolTip.SetToolTip(pictureBox, ueObject.AssetPath);  // Set the tooltip text for the panel
+
+                    // scope
+                    {
+                        // find the URL for this image, based on the asset path content folder.
+                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}");
+                        string contentFolder = ueObject.AssetPath.Replace("\\", "/").Split("/")[2];
+                        
+                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}");
+                        
+                        //find the URL for this, if it has any
+                        // log the URL
+                        UELibrary project = UEProjectCSV.UELibraryProjects.FirstOrDefault(x => x.ContentFolder.ToLower().Trim() == contentFolder.ToLower().Trim());
+                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}, URL: {project?.URL}");
+                        toolTip.SetToolTip(pictureBox, $"{ueObject.AssetPath}{Environment.NewLine}URL: {project?.URL}");  // Set the tooltip text for the panel
+                    }
 
                     panel.Controls.Add(pictureBox);
 
@@ -405,6 +417,24 @@ namespace QueryUELibrary
 
                     panel.MouseEnter += new EventHandler(mouseEnter);
                     pictureBox.MouseEnter += new EventHandler(mouseEnter);
+                    pictureBox.Click += (sender, e) =>
+                    {
+                        // find the URL for this image, based on the asset path content folder.
+                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}");
+                        string contentFolder = ueObject.AssetPath.Replace("\\", "/").Split("/")[2];
+                        
+                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}");
+                        
+                        //find the URL for this, if it has any
+                        // log the URL
+                        UELibrary project = UEProjectCSV.UELibraryProjects.FirstOrDefault(x => x.ContentFolder.ToLower().Trim() == contentFolder.ToLower().Trim());
+                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}, URL: {project?.URL}");
+                        if (project != default)
+                        {
+                            // open the URL
+                            Process.Start(new ProcessStartInfo("cmd", $"/c start {project.URL}") { CreateNoWindow = true });
+                        }
+                    };                    
                     label.MouseEnter += new EventHandler(mouseEnter);
 
                     panel.MouseLeave += new EventHandler(mouseLeave);
