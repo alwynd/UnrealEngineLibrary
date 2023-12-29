@@ -25,7 +25,7 @@ This Windows tool allows querying Unreal Engine projects for asset information, 
 
 It uses Powershell with a custom query string that is passed to a script template, for obtaining matching asset json, then displays their thumbnails in the UI. <br/>
 Clicking on a picture of an asset in the window, will open the marketplace URL, where that asset is located. <br/>
-Not all assets will have URL's, since some projects are too old and no longer exist in the marketplace buyt are still in my personal Unreal Engine library. <br/>
+Not all assets will have URL's, since some projects are too old and no longer exist in the marketplace but are still in my personal Unreal Engine library. <br/>
 
 ---
 
