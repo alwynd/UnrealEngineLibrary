@@ -25,6 +25,11 @@ public class UEImageLibrary
     public ConcurrentDictionary<string, long> UELibraryImages { get; private set; } = new ConcurrentDictionary<string, long>();
 
     /// <summary>
+    /// The imaghes without .png at the end.
+    /// </summary>
+    public HashSet<string> ImagePathsWithoutPng { get; private set; } = new();
+
+    /// <summary>
     /// Initialized?
     /// </summary>
     public bool Initialized { get; private set; } = false;
@@ -82,6 +87,10 @@ public class UEImageLibrary
                 }
                 progress?.Invoke(UELibraryImages.Count);
             });            
+            
+            // Prepare a HashSet out of the keys for a fast look-up. 
+            // Remove .png and convert to lower case
+            ImagePathsWithoutPng = new HashSet<string>(UEImageLibrary.Instance.UELibraryImages.Keys.Select(key => key.ToLower().Replace("\\", "/").Replace(".png", "")));
             
             Logging.Debug($"{GetType().Name}.Initialize UELibraryPath: {UELibraryPath}, UELibraryImages: {UELibraryImages.Count}");
             Initialized = true;

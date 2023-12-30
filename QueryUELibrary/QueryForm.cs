@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -93,6 +94,18 @@ namespace QueryUELibrary
         private List<UEJson> paginatedUEObjects = new List<UEJson>();
         
         private int currentPage = 1;                            // Simple pagination modification in OnQueryCompleted method
+        private ConcurrentDictionary<int, List<CustomPanel>> cachedPanels = new ConcurrentDictionary<int, List<CustomPanel>>();
+
+        // Color defined for Dark theme
+        Color backColor = Color.FromArgb(37, 37, 38);
+        Color foreColor = Color.FromArgb(204, 204, 204);
+            
+        Color buttonColor = Color.FromArgb(55, 55, 56);
+        Color buttonForeColor = Color.FromArgb(204, 204, 204);            
+        
+        Color resultPanelbackColor = Color.FromArgb(37, 37, 38);
+        Color resultPanelforeColor = Color.FromArgb(204, 204, 204);
+        Color resultPanelhoverBorderColor = Color.White;
 
         
         /// <summary>
@@ -189,13 +202,6 @@ namespace QueryUELibrary
             // 
             // QueryForm
             // 
-            // Color defined for Dark theme
-            Color backColor = Color.FromArgb(37, 37, 38);
-            Color foreColor = Color.FromArgb(204, 204, 204);
-            
-            Color buttonColor = Color.FromArgb(55, 55, 56);
-            Color buttonForeColor = Color.FromArgb(204, 204, 204);            
-            
             this.BackColor = backColor;
             this.ForeColor = foreColor;
 
@@ -282,6 +288,7 @@ namespace QueryUELibrary
             // Position it at the desired place. Set it in the middle of the form's height in this example.
             // Add it to the form.
             Label divider = new Label();
+            divider.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             divider.BackColor = Color.White;
             divider.Height = 2;
             divider.Width = ClientSize.Width - 20;
@@ -393,157 +400,161 @@ namespace QueryUELibrary
 
             paginatedUEObjects = UEObjects.Skip((currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList();
             PageLabel.Text = $"Page {currentPage} of {Math.Ceiling((double)UEObjects.Count / ItemsPerPage)}";
-            // if (UEObjects.Count > 256)
-            // {
-            //     Logging.Info($"{GetType().Name}.OnQueryCompleted Too many results.");
-            //     ErrorDialog errorDialog = new ErrorDialog($"Your query returned too many results, refine your search query. ONLY showing the 1st 256.");
-            //     errorDialog.ShowDialog();
-            //     UEObjects.RemoveRange(256, UEObjects.Count - 256);
-            // }
-            StatusLabel.Text = $"{Version}, Loading page: {currentPage} - {paginatedUEObjects.Count} Thumbnails";
             
+            StatusLabel.Text = $"{Version}, Loading page: {currentPage} - {paginatedUEObjects.Count} Thumbnails";
             paginatedUEObjects.Sort((x, y) => string.Compare(x.AssetPath.ToLower().Split(".").Last(), y.AssetPath.ToLower().Split(".").Last()));
-
-            // Color scheme
-            Color backColor = Color.FromArgb(37, 37, 38);
-            Color foreColor = Color.FromArgb(204, 204, 204);
-            Color hoverBorderColor = Color.White;
 
             // Clear/Remove any child components in the resultsScrollContainer
             resultsScrollContainer.Controls.Clear();
-
             await Task.Run(() =>
             {
-                var panels = paginatedUEObjects.AsParallel().AsOrdered()
-                .Where(ueObject =>
+                try
                 {
-                    // Find the corresponding image file path in UELibraryImages based on AssetPath
-                    var matchingImagePath = UEImageLibrary.Instance.UELibraryImages.Keys.FirstOrDefault(key =>
+                    var panels = PaginatePanels();
+                    this.Invoke((Action)(() =>
                     {
-                        return key.ToLower().Replace("\\", "/").Replace(".png", "")
-                            .EndsWith(ueObject.AssetPath.ToLower().Replace("\\", "/"));
-                    });
-                    Logging.Debug($"{GetType().Name}.OnQueryCompleted looking for: ueObject.AssetPath: {ueObject.AssetPath}, AssetType: {ueObject.AssetType}, SizeOnDisk: {FormatNumber(ueObject.SizeOnDisk)}, matchingImagePath: {matchingImagePath}");
-
-                    return (matchingImagePath != null);
-                })
-                .Select(ueObject =>
-                {
-                    var matchingImagePath = UEImageLibrary.Instance.UELibraryImages.Keys.FirstOrDefault(key =>
-                    {
-                        return key.ToLower().Replace("\\", "/").Replace(".png", "")
-                            .EndsWith(ueObject.AssetPath.ToLower().Replace("\\", "/"));
-                    });
-                    Logging.Debug($"{GetType().Name}.OnQueryCompleted FOUND: ueObject.AssetPath: {ueObject.AssetPath}, AssetType: {ueObject.AssetType}, SizeOnDisk: {FormatNumber(ueObject.SizeOnDisk)}, matchingImagePath: {matchingImagePath}");
-
-                    var panel = new CustomPanel
-                    {
-                        Width = 256,
-                        Height = 300,
-                        BackColor = backColor,
-                        ForeColor = foreColor,
-                    };
-
-                    ToolTip toolTip = new ToolTip();  // Create a new ToolTip instance
-                    toolTip.SetToolTip(panel, ueObject.AssetPath);  // Set the tooltip text for the panel
-                    
-                    // create a new PictureBox
-                    var pictureBox = new PictureBox
-                    {
-                        Image = Image.FromFile(matchingImagePath),
-                        Width = panel.Width -
-                                panel.BorderThickness * 2, // Lessen the width to allow for the custom border
-                        Height = 256 - panel.BorderThickness * 2, // Lessen the height to allow for the custom border
-                        BackColor = backColor,
-                        BorderStyle = BorderStyle.None, // Set border to none as we're using a custom border
-                        Location = new Point(panel.BorderThickness, panel.BorderThickness) // Shift the picture box inside to expose the custom border
-                    };
-
-                    // scope
-                    {
-                        // find the URL for this image, based on the asset path content folder.
-                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}");
-                        string contentFolder = ueObject.AssetPath.Replace("\\", "/").Split("/")[2];
-                        
-                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}");
-                        
-                        //find the URL for this, if it has any
-                        // log the URL
-                        UELibrary project = UEProjectCSV.UELibraryProjects.FirstOrDefault(x => x.ContentFolder.ToLower().Trim() == contentFolder.ToLower().Trim());
-                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}, URL: {project?.URL}");
-                        toolTip.SetToolTip(pictureBox, $"{ueObject.AssetPath}{Environment.NewLine}URL: {project?.URL}");  // Set the tooltip text for the panel
-                    }
-
-                    panel.Controls.Add(pictureBox);
-
-                    var label = new Label
-                    {
-                        Text = $"{ueObject.AssetPath.Replace("\\", "/").Split("/")[2]}\r\n{ueObject.AssetPath.Split(".").Last()}\r\n" +
-                               $"{ueObject.AssetType.Replace("\\", "/").Split("/").Last().Split(".").Last()}, {FormatNumber(ueObject.SizeOnDisk)}",
-                        Width = pictureBox.Width, Location = new Point(panel.BorderThickness, pictureBox.Height + panel.BorderThickness), // Position the label just below the PictureBox
-                        AutoSize = true,
-                        BackColor = backColor,
-                        ForeColor = foreColor,
-                    };
-                    
-
-                    // Attach hover event handlers to highlight border on hover
-                    Action<object, EventArgs> mouseEnter = (s, e) =>
-                    {
-                        panel.BorderColor = hoverBorderColor;
-                        panel.Invalidate();
-                        toolTip.Active = true;   // Activate the tooltip when the mouse enters
-                    };
-                    Action<object, EventArgs> mouseLeave = (s, e) =>
-                    {
-                        panel.BorderColor = Color.Black;
-                        panel.Invalidate();
-                        toolTip.Active = false;   // Activate the tooltip when the mouse enters
-                    };
-
-                    panel.MouseEnter += new EventHandler(mouseEnter);
-                    pictureBox.MouseEnter += new EventHandler(mouseEnter);
-                    pictureBox.Click += (sender, e) =>
-                    {
-                        // find the URL for this image, based on the asset path content folder.
-                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}");
-                        string contentFolder = ueObject.AssetPath.Replace("\\", "/").Split("/")[2];
-                        
-                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}");
-                        
-                        //find the URL for this, if it has any
-                        // log the URL
-                        UELibrary project = UEProjectCSV.UELibraryProjects.FirstOrDefault(x => x.ContentFolder.ToLower().Trim() == contentFolder.ToLower().Trim());
-                        Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}, URL: {project?.URL}");
-                        if (project != default)
+                        foreach (var panel in panels)
                         {
-                            // open the URL
-                            Process.Start(new ProcessStartInfo("cmd", $"/c start {project.URL}") { CreateNoWindow = true });
+                            resultsScrollContainer.Controls.Add(panel);
                         }
-                    };                    
-                    label.MouseEnter += new EventHandler(mouseEnter);
-
-                    panel.MouseLeave += new EventHandler(mouseLeave);
-                    pictureBox.MouseLeave += new EventHandler(mouseLeave);
-                    label.MouseLeave += new EventHandler(mouseLeave);
-
-                    panel.Controls.Add(label);
-                    panel.Height = pictureBox.Height + label.Height + panel.BorderThickness * 2; //Modify the panel height to fit the pictureBox and label
-                    return panel;
-                }).ToList();
-                
-                this.Invoke((Action) (() =>
+                        StatusLabel.Text = $"{Version}: Current Page: {panels.Count} items.";
+                    }));
+                }
+                catch (Exception ex)
                 {
-                    foreach (var panel in panels)
-                    {
-                        resultsScrollContainer.Controls.Add(panel);
-                    }
-                    StatusLabel.Text = $"{Version}";
-                }));
-                
+                    Logging.Error(ex, $"{GetType().Name}.OnQueryCompleted Error.");
+                    StatusLabel.Text = $"{Version}, Exception occurred while paginating thumbnails, check log for details.";
+                    ErrorDialog errorDialog = new ErrorDialog($"Exception occurred while paginating thumbnails: {ex}"); errorDialog.ShowDialog();
+                }
             });
 
             Logging.Debug($"{GetType().Name}.OnQueryCompleted:-- END");
+        }
+
+        /// <summary>
+        /// Paginate the results.
+        /// </summary>
+        private List<CustomPanel> PaginatePanels()
+        {
+                List<CustomPanel> panels = null;
+                if (cachedPanels.ContainsKey(currentPage)) return cachedPanels[currentPage]; 
+                
+                panels = PanelQuery();
+                cachedPanels[currentPage] = panels; 
+                return panels;
+        }
+
+        /// <summary>
+        /// Panel query.
+        /// </summary>
+        private List<CustomPanel>? PanelQuery()
+        {
+            var panels = paginatedUEObjects.AsParallel().AsOrdered()
+            .Select(ueObject =>
+            {
+                var matchingImagePath = UEImageLibrary.Instance.ImagePathsWithoutPng.FirstOrDefault(key =>
+                {
+                    return key.EndsWith(ueObject.AssetPath.ToLower().Replace("\\", "/"));
+                }) + ".png";
+                Logging.Debug($"{GetType().Name}.OnQueryCompleted FOUND: ueObject.AssetPath: {ueObject.AssetPath}, AssetType: {ueObject.AssetType}, SizeOnDisk: {FormatNumber(ueObject.SizeOnDisk)}, matchingImagePath: {matchingImagePath}");
+
+                var panel = new CustomPanel
+                {
+                    Width = 256,
+                    Height = 300,
+                    BackColor = resultPanelbackColor,
+                    ForeColor = resultPanelforeColor,
+                };
+
+                ToolTip toolTip = new ToolTip();  // Create a new ToolTip instance
+                toolTip.SetToolTip(panel, ueObject.AssetPath);  // Set the tooltip text for the panel
+                
+                // create a new PictureBox
+                var pictureBox = new PictureBox
+                {
+                    Image = Image.FromFile(matchingImagePath),
+                    Width = panel.Width -
+                            panel.BorderThickness * 2, // Lessen the width to allow for the custom border
+                    Height = 256 - panel.BorderThickness * 2, // Lessen the height to allow for the custom border
+                    BackColor = resultPanelbackColor,
+                    BorderStyle = BorderStyle.None, // Set border to none as we're using a custom border
+                    Location = new Point(panel.BorderThickness, panel.BorderThickness) // Shift the picture box inside to expose the custom border
+                };
+
+                // scope
+                {
+                    // find the URL for this image, based on the asset path content folder.
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}");
+                    string contentFolder = ueObject.AssetPath.Replace("\\", "/").Split("/")[2];
+                    
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}");
+                    
+                    //find the URL for this, if it has any
+                    // log the URL
+                    UELibrary project = UEProjectCSV.UELibraryProjects.FirstOrDefault(x => x.ContentFolder.ToLower().Trim() == contentFolder.ToLower().Trim());
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted.FINDURL: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}, URL: {project?.URL}");
+                    toolTip.SetToolTip(pictureBox, $"{ueObject.AssetPath}{Environment.NewLine}URL: {project?.URL}");  // Set the tooltip text for the panel
+                }
+
+                panel.Controls.Add(pictureBox);
+
+                var label = new Label
+                {
+                    Text = $"{ueObject.AssetPath.Replace("\\", "/").Split("/")[2]}\r\n{ueObject.AssetPath.Split(".").Last()}\r\n" +
+                           $"{ueObject.AssetType.Replace("\\", "/").Split("/").Last().Split(".").Last()}, {FormatNumber(ueObject.SizeOnDisk)}",
+                    Width = pictureBox.Width, Location = new Point(panel.BorderThickness, pictureBox.Height + panel.BorderThickness), // Position the label just below the PictureBox
+                    AutoSize = true,
+                    BackColor = resultPanelbackColor,
+                    ForeColor = resultPanelforeColor,
+                };
+                
+
+                // Attach hover event handlers to highlight border on hover
+                Action<object, EventArgs> mouseEnter = (s, e) =>
+                {
+                    panel.BorderColor = resultPanelhoverBorderColor;
+                    panel.Invalidate();
+                    toolTip.Active = true;   // Activate the tooltip when the mouse enters
+                };
+                Action<object, EventArgs> mouseLeave = (s, e) =>
+                {
+                    panel.BorderColor = Color.Black;
+                    panel.Invalidate();
+                    toolTip.Active = false;   // Activate the tooltip when the mouse enters
+                };
+
+                panel.MouseEnter += new EventHandler(mouseEnter);
+                pictureBox.MouseEnter += new EventHandler(mouseEnter);
+                pictureBox.Click += (sender, e) =>
+                {
+                    // find the URL for this image, based on the asset path content folder.
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}");
+                    string contentFolder = ueObject.AssetPath.Replace("\\", "/").Split("/")[2];
+                    
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}");
+                    
+                    //find the URL for this, if it has any
+                    // log the URL
+                    UELibrary project = UEProjectCSV.UELibraryProjects.FirstOrDefault(x => x.ContentFolder.ToLower().Trim() == contentFolder.ToLower().Trim());
+                    Logging.Debug($"{GetType().Name}.OnQueryCompleted.Click: ueObject.AssetPath: {ueObject.AssetPath}, contentFolder: {contentFolder}, URL: {project?.URL}");
+                    if (project != default)
+                    {
+                        // open the URL
+                        Process.Start(new ProcessStartInfo("cmd", $"/c start {project.URL}") { CreateNoWindow = true });
+                    }
+                };                    
+                label.MouseEnter += new EventHandler(mouseEnter);
+
+                panel.MouseLeave += new EventHandler(mouseLeave);
+                pictureBox.MouseLeave += new EventHandler(mouseLeave);
+                label.MouseLeave += new EventHandler(mouseLeave);
+
+                panel.Controls.Add(label);
+                panel.Height = pictureBox.Height + label.Height + panel.BorderThickness * 2; //Modify the panel height to fit the pictureBox and label
+                return panel;
+            }).ToList();
+
+            return panels;
         }
 
         /// <summary>
@@ -573,6 +584,7 @@ namespace QueryUELibrary
             var queryJq = new QueryUELibrary.QueryJQ();
 
             currentPage = 1;
+            cachedPanels.Clear();
             
             // color scheme, externalize if you want to
             Color backColor = Color.FromArgb(37, 37, 38);
@@ -585,7 +597,7 @@ namespace QueryUELibrary
             var busyDialog = new System.Windows.Forms.Form()
             {
                 ControlBox = true,
-                Size = this.Size, // Same size as current form
+                Size = this.Size/2, // Same size as current form
                 StartPosition = FormStartPosition.CenterScreen,
                 Text = "Processing...",
                 FormBorderStyle = FormBorderStyle.Sizable, // Make the form resizable
@@ -684,6 +696,7 @@ namespace QueryUELibrary
                         Logging.Debug($"{GetType().Name}.Query result: {msg}");
                         AppendAndScrollToEnd(errorTextBox, msg);
                         statusLabel.Text = $"Output: {FormatNumber(resultTextBox.Text.Length)}, Error: {FormatNumber(errorTextBox.Text.Length)}, OK, {UEObjects.Count} Matches.";
+                        RemoveItemsWithNoImages();
                         QueryCompleted?.Invoke();
                     }
                     else
@@ -710,6 +723,24 @@ namespace QueryUELibrary
         }
 
         /// <summary>
+        /// Removes items with no images.
+        /// </summary>
+        private void RemoveItemsWithNoImages()
+        {
+            Logging.Debug($"{GetType().Name}.RemoveItemsWithNoImages:-- START, UEObjects: {UEObjects.Count}");
+
+            // Use PLINQ to perform operation in parallel
+            UEObjects = UEObjects.AsParallel()
+                .Where(ueObject =>
+                {
+                    string transformedAssetPath = ueObject.AssetPath.ToLower().Replace("\\", "/");
+                    return UEImageLibrary.Instance.ImagePathsWithoutPng.Any(path => path.EndsWith(transformedAssetPath));
+                })
+                .ToList();
+            Logging.Debug($"{GetType().Name}.RemoveItemsWithNoImages DONE: UEObjects: {UEObjects.Count}");            
+        }
+
+        /// <summary>
         /// Scrolls to end.
         /// </summary>
         private void AppendAndScrollToEnd(TextBox textBox, string text)
@@ -722,7 +753,7 @@ namespace QueryUELibrary
         /// <summary>
         /// Format number.
         /// </summary>
-        private static string FormatNumber(int length)
+        private static string FormatNumber(long length)
         {
             var sizes = new[] { "B", "KB", "MB", "GB" };
             double len = length;
