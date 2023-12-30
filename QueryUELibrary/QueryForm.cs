@@ -9,7 +9,7 @@ namespace QueryUELibrary
     public partial class QueryForm : Form
     {
         private static readonly string Version = "Version: 1.0, alwyn.j.dippenaar@gmail.com";
-        
+        private static readonly int ItemsPerPage = 256;
         
         /// <summary>
         /// Query Button
@@ -65,15 +65,35 @@ namespace QueryUELibrary
         /// The results scrolling panel.
         /// </summary>
         public readonly FlowLayoutPanel resultsScrollContainer = new FlowLayoutPanel();
-
         
         /// <summary>
         /// The help button.
         /// </summary>
         public readonly Button HTMLHelpButton = new Button();
+        
+        /// <summary>
+        /// The previous page button.
+        /// </summary>
+        public readonly Button PrevButton = new Button();
 
-        private List<UEJson> UEObjects = new List<UEJson>();
+        /// <summary>
+        /// The next page button
+        /// </summary>
+        public readonly Button NextButton = new Button();
+
+        /// <summary>
+        /// The page index label.
+        /// </summary>
+        public readonly Label PageLabel = new Label();
+        
+
         private Action QueryCompleted;
+        
+        private List<UEJson> UEObjects = new List<UEJson>();
+        private List<UEJson> paginatedUEObjects = new List<UEJson>();
+        
+        private int currentPage = 1;                            // Simple pagination modification in OnQueryCompleted method
+
         
         /// <summary>
         /// Default constructor.
@@ -140,6 +160,25 @@ namespace QueryUELibrary
                 myForm.Controls.Add(webBrowser);
                 myForm.ShowDialog();
             };
+            
+            
+            NextButton.Click += (sender, args) =>
+            {
+                if (currentPage * ItemsPerPage < UEObjects.Count)
+                {
+                    currentPage++;
+                    OnQueryCompleted();
+                }
+            };
+
+            PrevButton.Click += (sender, args) =>
+            {
+                if (currentPage > 1)
+                {
+                    currentPage--;
+                    OnQueryCompleted();
+                }
+            };             
         }
 
         /// <summary>
@@ -226,15 +265,29 @@ namespace QueryUELibrary
             HTMLHelpButton.Font = new Font(QueryButton.Font, FontStyle.Bold);
             HTMLHelpButton.BackColor = buttonColor;
             HTMLHelpButton.ForeColor = buttonForeColor;            
-            HTMLHelpButton.SetBounds(QueryButton.Right + 10, QueryButton.Top, 100, 45);
+            HTMLHelpButton.SetBounds(QueryButton.Right + 10, QueryButton.Top, 150, 55);
             this.Controls.Add(HTMLHelpButton);                        
 
             ExamplesButton.Text = "Examples";
             ExamplesButton.Font = new Font(QueryButton.Font, FontStyle.Bold);
             ExamplesButton.BackColor = buttonColor;
             ExamplesButton.ForeColor = buttonForeColor;            
-            ExamplesButton.SetBounds(HTMLHelpButton.Right + 10, HTMLHelpButton.Top, 100, 45);
+            ExamplesButton.SetBounds(HTMLHelpButton.Right + 10, HTMLHelpButton.Top, 150, 55);
             this.Controls.Add(ExamplesButton);                        
+            
+            // Create a new label.
+            // Set its background color to your preferred color. Using black here.
+            // Set its height to 1 to make it thin like a divider.
+            // Make it extend across the form.
+            // Position it at the desired place. Set it in the middle of the form's height in this example.
+            // Add it to the form.
+            Label divider = new Label();
+            divider.BackColor = Color.White;
+            divider.Height = 2;
+            divider.Width = ClientSize.Width - 20;
+            divider.Left = 10;
+            divider.Top = ExamplesButton.Bottom + 15;
+            this.Controls.Add(divider);            
             
             
             // Creating new label for "Results"
@@ -242,14 +295,45 @@ namespace QueryUELibrary
             resultsLabel.Font = new Font(resultsLabel.Font, FontStyle.Bold);
             resultsLabel.ForeColor = foreColor;
             resultsLabel.BackColor = backColor;
-            resultsLabel.SetBounds(10, ExamplesButton.Bottom + 15, ClientSize.Width - 20, 20); 
+            resultsLabel.AutoSize = true;
+            resultsLabel.Left = 10;
+            resultsLabel.Top = divider.Bottom + 30;
+            //resultsLabel.SetBounds(10, ExamplesButton.Bottom + 15, ClientSize.Width - 20, 20); 
             this.Controls.Add(resultsLabel);
+
+            // Add required button controls
+            PrevButton.Text = "Prev";
+            PrevButton.Font = new Font(QueryButton.Font, FontStyle.Bold);
+            PrevButton.BackColor = buttonColor;
+            PrevButton.ForeColor = buttonForeColor;            
+            PrevButton.SetBounds(resultsLabel.Right + 10, resultsLabel.Top, 80, 25);
+            this.Controls.Add(PrevButton);
+
+            // Add required labels
+            PageLabel.Text = "Page 1 of 1";
+            PageLabel.Font = new Font(resultsLabel.Font, FontStyle.Bold);
+            PageLabel.ForeColor = foreColor;
+            PageLabel.BackColor = backColor;
+            PageLabel.AutoSize = true;
+            PageLabel.Left = PrevButton.Right + 10;
+            PageLabel.Top = PrevButton.Top;
+            //PageLabel.SetBounds(PrevButton.Right + 10, PrevButton.Top, ClientSize.Width - 20, 20); 
+            this.Controls.Add(PageLabel);            
+
+            
+            NextButton.Text = "Next";
+            NextButton.Font = new Font(QueryButton.Font, FontStyle.Bold);
+            NextButton.BackColor = buttonColor;
+            NextButton.ForeColor = buttonForeColor;            
+            NextButton.SetBounds(PageLabel.Right + 10, PageLabel.Top, 80, 25);
+            this.Controls.Add(NextButton);
+            
             
             // Creating new scrollable panel for results
             // Add this line to give the panel a border
             // Replace this with a slightly darker color
             resultsPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            resultsPanel.SetBounds(10, resultsLabel.Bottom + 10, ClientSize.Width - 20, ClientSize.Height - QueryButton.Bottom - 75);
+            resultsPanel.SetBounds(10, PageLabel.Bottom + 30, ClientSize.Width - 20, ClientSize.Height - PageLabel.Bottom - 75);
             resultsPanel.BorderStyle = BorderStyle.FixedSingle;
             resultsPanel.BackColor = Color.FromArgb(27, 27, 28); // Darker shade of your existing backColor (37, 37, 38)
             resultsPanel.ForeColor = foreColor; 
@@ -307,16 +391,18 @@ namespace QueryUELibrary
         {
             Logging.Debug($"{GetType().Name}.OnQueryCompleted:-- START");
 
-            if (UEObjects.Count > 256)
-            {
-                Logging.Info($"{GetType().Name}.OnQueryCompleted Too many results.");
-                ErrorDialog errorDialog = new ErrorDialog($"Your query returned too many results, refine your search query. ONLY showing the 1st 256.");
-                errorDialog.ShowDialog();
-                UEObjects.RemoveRange(256, UEObjects.Count - 256);
-            }
-            StatusLabel.Text = $"{Version}, Loading {UEObjects.Count} Thumbnails";
+            paginatedUEObjects = UEObjects.Skip((currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList();
+            PageLabel.Text = $"Page {currentPage} of {Math.Ceiling((double)UEObjects.Count / ItemsPerPage)}";
+            // if (UEObjects.Count > 256)
+            // {
+            //     Logging.Info($"{GetType().Name}.OnQueryCompleted Too many results.");
+            //     ErrorDialog errorDialog = new ErrorDialog($"Your query returned too many results, refine your search query. ONLY showing the 1st 256.");
+            //     errorDialog.ShowDialog();
+            //     UEObjects.RemoveRange(256, UEObjects.Count - 256);
+            // }
+            StatusLabel.Text = $"{Version}, Loading page: {currentPage} - {paginatedUEObjects.Count} Thumbnails";
             
-            UEObjects.Sort((x, y) => string.Compare(x.AssetPath.ToLower().Split(".").Last(), y.AssetPath.ToLower().Split(".").Last()));
+            paginatedUEObjects.Sort((x, y) => string.Compare(x.AssetPath.ToLower().Split(".").Last(), y.AssetPath.ToLower().Split(".").Last()));
 
             // Color scheme
             Color backColor = Color.FromArgb(37, 37, 38);
@@ -328,7 +414,7 @@ namespace QueryUELibrary
 
             await Task.Run(() =>
             {
-                var panels = UEObjects.AsParallel().AsOrdered()
+                var panels = paginatedUEObjects.AsParallel().AsOrdered()
                 .Where(ueObject =>
                 {
                     // Find the corresponding image file path in UELibraryImages based on AssetPath
@@ -486,6 +572,8 @@ namespace QueryUELibrary
             // Creating an instance of QueryJQ
             var queryJq = new QueryUELibrary.QueryJQ();
 
+            currentPage = 1;
+            
             // color scheme, externalize if you want to
             Color backColor = Color.FromArgb(37, 37, 38);
             Color foreColor = Color.FromArgb(204, 204, 204);
