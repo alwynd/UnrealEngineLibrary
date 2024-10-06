@@ -1,7 +1,7 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 SET ReleaseDir=Release
 SET SourceDir=QueryUELibrary\bin\Release\net8.0-windows
-SET dateStr=%date:~10,4%-%date:~4,2%-%date:~7,2%
+for /f "delims=" %%# in ('powershell get-date -format "{yyyy-MM-dd-HH-mm}"') do set dateStr=%%#
 SET zipFile=QueryUELibrary-%dateStr%.zip
 
 :: Make/Clean the Release folder.
